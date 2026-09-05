@@ -262,6 +262,26 @@ kbd{
 .warnbox ul{margin:0;padding-left:1.2em;color:var(--warn-ink);}
 .warnbox li{margin-bottom:7px;}
 
+.offerbox{
+  margin-top:22px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent-ink);
+  border-radius:var(--radius);
+  padding:20px 22px;
+}
+.offerbox h3{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  font-size:1.05rem;
+  color:var(--accent-ink);
+  margin:0 0 10px;
+}
+.offerbox p{margin:0;color:var(--ink-soft);max-width:62ch;}
+.offerbox strong{color:var(--ink);}
+
 footer{
   margin-top:56px;
   padding-top:20px;
@@ -285,7 +305,7 @@ footer{
       <div class="masthead-eyebrow">Notice d'utilisation — v1</div>
       <h1>Clinique Auto <span>Boudia</span></h1>
     </div>
-    <div class="plate">app :: <a href="https://mecapulse-garage.onrender.com" target="_blank" rel="noopener">mecapulse-garage.onrender.com</a></div>
+    <div class="plate">app :: <a href="https://mecapulse-garage.onrender.com" target="_blank" rel="noopener">Ouvrir l'application →</a></div>
   </div>
 
   <p class="lede">Ce document accompagne le test de l'application de gestion d'atelier. Suivez les étapes <strong>dans l'ordre</strong> une première fois — c'est le circuit réel d'un véhicule, de sa réception à l'encaissement.</p>
@@ -424,13 +444,18 @@ footer{
     <ul>
       <li>Toutes les données (clients, factures, recettes) restent enregistrées <strong>dans ce navigateur, sur cet ordinateur</strong> — rien n'est partagé automatiquement avec un autre poste.</li>
       <li>Ne videz jamais le cache / les données de navigation sur ce poste : cela effacerait définitivement l'historique.</li>
-      <li>Un même poste doit rester dédié à l'application pour garder un historique cohérent.</li>
+      <li>Un même poste doit rester dédié à l'application pour garder un historique cohérent : dans la configuration actuelle, secrétariat et gérance ne peuvent pas voir les mêmes données en direct sur deux ordinateurs différents.</li>
     </ul>
+  </div>
+
+  <div class="offerbox">
+    <h3>Besoin de deux postes reliés — secrétariat &amp; gérance ?</h3>
+    <p>C'est possible : accueil et gérance travaillent alors sur les <strong>mêmes clients, factures et recettes</strong> en temps réel, sur deux ordinateurs distincts. Ce n'est pas inclus dans la version actuelle — c'est une <strong>option payante</strong> (mise en place d'une base de données partagée), à commander séparément si le besoin est confirmé après ce test.</p>
   </div>
 
   <footer>
     <span>Clinique Auto Boudia</span>
-    <span>Notice v1 — mecapulse-garage.onrender.com</span>
+    <span>Notice v1 — Application de gestion d'atelier</span>
   </footer>
 
 </div>
