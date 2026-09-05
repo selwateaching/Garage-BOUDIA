@@ -139,6 +139,8 @@ html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-seri
   <div class="topbar">
     <h1>DEVIS <span>AUTO</span></h1>
     <div style="display:flex;gap:10px;align-items:center;">
+      <a href="clients.html" style="font-size:.75rem;color:#555;text-decoration:none;">👥 Clients</a>
+      <a href="recettes.html" style="font-size:.75rem;color:#555;text-decoration:none;">💰 Recettes</a>
       <a href="parametres.html" style="font-size:.75rem;color:#555;text-decoration:none;">⚙ Paramètres</a>
       <button class="btn btn-reset" style="padding:7px 16px;font-size:.8rem;" onclick="resetDevis()">↺ Nouveau</button>
     </div>
@@ -172,11 +174,19 @@ html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-seri
     <!-- CLIENT -->
     <div class="sec-title">CLIENT</div>
     <div class="sec-body">
+      <div style="display:flex;gap:0;width:fit-content;margin-bottom:10px;">
+        <button type="button" id="ctype-part" class="btn-reset" style="padding:5px 14px;font-size:.7rem;border-radius:3px 0 0 3px;" onclick="setClientType('particulier')">Particulier</button>
+        <button type="button" id="ctype-ent" class="btn-reset" style="padding:5px 14px;font-size:.7rem;border-radius:0 3px 3px 0;" onclick="setClientType('entreprise')">Entreprise</button>
+      </div>
       <div class="g2">
-        <div class="fg"><label>Nom complet</label><input id="c-nom" placeholder="Nom du client"></div>
+        <div class="fg"><label id="c-nom-label">Nom complet</label><input id="c-nom" list="clients-list" placeholder="Nom du client — tape pour retrouver un client existant" oninput="tryAutofillClient()"></div>
+        <datalist id="clients-list"></datalist>
+        <div class="fg" id="c-contact-wrap" style="display:none;"><label>Nom du contact</label><input id="c-contact" placeholder="Contact"></div>
         <div class="fg"><label>Adresse</label><input id="c-adr" placeholder="Adresse"></div>
         <div class="fg"><label>Téléphone</label><input id="c-tel" type="tel" placeholder="Téléphone"></div>
         <div class="fg"><label>Email</label><input id="c-email" type="email" placeholder="Email"></div>
+        <div class="fg" id="c-nif-wrap" style="display:none;"><label>NIF</label><input id="c-nif" placeholder="NIF"></div>
+        <div class="fg" id="c-rc-wrap" style="display:none;"><label>RC</label><input id="c-rc" placeholder="Registre de commerce"></div>
       </div>
     </div>
 
@@ -300,10 +310,11 @@ html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-seri
         <canvas id="sig-client" class="sig-canvas"></canvas>
         <button class="sig-clear" onclick="clearSig('sig-client')">✕ Effacer</button>
       </div>
-      <div class="sig-box">
+      <div class="sig-box" style="position:relative;">
         <div class="sig-lbl">Signature du garage</div>
         <div class="sig-mention">Cachet et signature</div>
         <canvas id="sig-garage" class="sig-canvas"></canvas>
+        <img id="tampon-display" src="" alt="" style="position:absolute;right:10px;bottom:26px;width:60px;height:60px;object-fit:contain;opacity:.85;pointer-events:none;display:none;">
         <button class="sig-clear" onclick="clearSig('sig-garage')">✕ Effacer</button>
       </div>
     </div>
@@ -314,6 +325,7 @@ html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-seri
     <button class="btn btn-pdf" onclick="genPDF()">⬇ Télécharger PDF</button>
     <button class="btn btn-send" onclick="sendGmail()">✉ Envoyer au client</button>
     <button class="btn btn-plan" onclick="openPlanning()">📅 Planifier RDV</button>
+    <button class="btn" style="background:var(--vert,#2e7d32);color:#fff;" onclick="validerDevis()">✅ Valider le devis</button>
     <button class="btn btn-print" onclick="window.print()">🖨 Imprimer</button>
     <button class="btn btn-reset" onclick="resetDevis()">↺ Nouveau devis</button>
   </div>
@@ -366,11 +378,40 @@ const GARAGE={
 };
 document.getElementById('gn-nom').innerHTML=(GARAGE.nom||'Mon Garage').toUpperCase();
 mpgApplyLogo('gn-logo');
+mpgApplyTampon('tampon-display');
+mpgFillClientDatalist('clients-list');
 document.getElementById('gn-info').innerHTML=[
   [GARAGE.adresse,GARAGE.ville].filter(Boolean).join(' — '),
   [GARAGE.tel,GARAGE.email].filter(Boolean).join(' | '),
   [GARAGE.nif?('NIF : '+GARAGE.nif):'',GARAGE.rc?('RC : '+GARAGE.rc):''].filter(Boolean).join(' | ')
 ].filter(Boolean).join('<br>');
+
+// ══ TYPE DE CLIENT (particulier / entreprise) ══
+let curClientType = 'particulier';
+function setClientType(t){
+  curClientType = t;
+  document.getElementById('ctype-part').style.background = t==='particulier' ? '#111' : '#e5e7eb';
+  document.getElementById('ctype-part').style.color = t==='particulier' ? '#fff' : '#374151';
+  document.getElementById('ctype-ent').style.background = t==='entreprise' ? '#111' : '#e5e7eb';
+  document.getElementById('ctype-ent').style.color = t==='entreprise' ? '#fff' : '#374151';
+  document.getElementById('c-nom-label').textContent = t==='entreprise' ? 'Raison sociale' : 'Nom complet';
+  document.getElementById('c-contact-wrap').style.display = t==='entreprise' ? 'flex' : 'none';
+  document.getElementById('c-nif-wrap').style.display = t==='entreprise' ? 'flex' : 'none';
+  document.getElementById('c-rc-wrap').style.display = t==='entreprise' ? 'flex' : 'none';
+}
+setClientType('particulier');
+
+// Auto-remplissage quand le nom saisi correspond à un client déjà enregistré
+function tryAutofillClient(){
+  const nom = document.getElementById('c-nom').value;
+  const c = mpgFindClientByName(nom);
+  if(!c) return;
+  setClientType(c.type||'particulier');
+  sv('c-adr', c.adresse||'');
+  sv('c-tel', c.tel||'');
+  sv('c-email', c.email||'');
+  if(c.type==='entreprise'){ sv('c-contact', c.contact||''); sv('c-nif', c.nif||''); sv('c-rc', c.rc||''); }
+}
 
 // NUMÉRO AUTO
 function nextNum(){
@@ -500,9 +541,34 @@ function resetDevis(){
   if(!confirm('Nouveau devis ? (données actuelles perdues)'))return;
   ['mo-body','piece-body','st-body'].forEach(id=>document.getElementById(id).innerHTML='');
   moC=0;piC=0;stC=0;
-  ['c-nom','c-adr','c-tel','c-email','v-immat','v-marque','v-annee','v-km','v-vin','v-moteur'].forEach(id=>sv(id,''));
+  ['c-nom','c-adr','c-tel','c-email','c-contact','c-nif','c-rc','v-immat','v-marque','v-annee','v-km','v-vin','v-moteur'].forEach(id=>sv(id,''));
+  setClientType('particulier');
   clearSig('sig-client');clearSig('sig-garage');
   initDevis();toast('Nouveau devis créé !');
+  mpgFillClientDatalist('clients-list');
+}
+
+function parseDA(str){ return parseFloat(String(str).replace(/[^\d,.-]/g,'').replace(',','.')) || 0; }
+
+// ══ VALIDER LE DEVIS — enregistre le client et le devis dans l'historique (recettes) ══
+function validerDevis(){
+  const d = collect();
+  if(!d.client.nom){ toast('⚠️ Nom du client requis'); return; }
+  const client = curClientType==='entreprise'
+    ? { type:'entreprise', nom:d.client.nom, contact:gv('c-contact'), tel:d.client.tel, email:d.client.email, nif:gv('c-nif'), rc:gv('c-rc'), adresse:d.client.adr }
+    : { type:'particulier', nom:d.client.nom, tel:d.client.tel, email:d.client.email, adresse:d.client.adr };
+  mpgUpsertClient(client);
+  mpgSaveDevisRecord({
+    numero: d.numero,
+    date: new Date().toISOString(),
+    clientNom: d.client.nom,
+    clientType: curClientType,
+    vehicule: (d.vehicule.marque||'')+(d.vehicule.immat?' — '+d.vehicule.immat:''),
+    montantTTC: parseDA(d.ttc),
+    garage: GARAGE.nom
+  });
+  mpgFillClientDatalist('clients-list');
+  toast('✅ Devis '+d.numero+' validé et ajouté aux recettes');
 }
 
 // COLLECT
@@ -639,6 +705,7 @@ async function genPDF(){
     const sc=document.getElementById('sig-client'),sg=document.getElementById('sig-garage');
     if(!blank(sc))doc.addImage(sc.toDataURL('image/png'),'PNG',mg+1,y+1,hw-2,24);
     if(!blank(sg))doc.addImage(sg.toDataURL('image/png'),'PNG',mg+hw+7,y+1,hw-2,24);
+    if(_s.tampon){const tFmt=(_s.tampon.match(/^data:image\/(\w+);/)||[])[1];doc.addImage(_s.tampon,(tFmt?tFmt.toUpperCase().replace('JPG','JPEG'):'PNG'),mg+hw+7+hw-16,y+3,14,14);}
   }catch(e){}
   y+=30;
   ln(mg,y,W-mg,y,[180,180,180],0.3);

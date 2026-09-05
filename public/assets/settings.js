@@ -10,6 +10,7 @@ const MPG_DEFAULTS = {
   rc: '',
   ai: '',
   logo: '',
+  tampon: '',
   mecaA: 'Mécanicien A',
   mecaB: 'Mécanicien B',
   mecaC: 'Mécanicien C'
@@ -55,16 +56,99 @@ function mpgBindAutoSave(){
   });
 }
 
-// Affiche le logo du garage s'il a été configuré (image #imgId), sinon garde le repli visible (#fallbackId)
-function mpgApplyLogo(imgId, fallbackId){
+// Affiche une image de paramètre (logo ou tampon) si configurée (image #imgId), sinon garde le repli visible (#fallbackId)
+function mpgApplyImage(key, imgId, fallbackId){
   const s = mpgGetSettings();
   const img = document.getElementById(imgId);
   const fb = fallbackId ? document.getElementById(fallbackId) : null;
-  if(img && s.logo){
-    img.src = s.logo;
+  if(img && s[key]){
+    img.src = s[key];
     img.style.display = 'block';
     if(fb) fb.style.display = 'none';
   }
+}
+function mpgApplyLogo(imgId, fallbackId){ mpgApplyImage('logo', imgId, fallbackId); }
+function mpgApplyTampon(imgId, fallbackId){ mpgApplyImage('tampon', imgId, fallbackId); }
+
+// ══ CLIENTS (particuliers / entreprises) ══
+function mpgGetClients(){
+  try{ return JSON.parse(localStorage.getItem('mpg_clients') || '[]'); }
+  catch(e){ return []; }
+}
+function mpgSaveClients(list){
+  localStorage.setItem('mpg_clients', JSON.stringify(list));
+}
+// Ajoute ou met à jour un client (identifié par nom, insensible à la casse). Retourne le client sauvegardé.
+function mpgUpsertClient(client){
+  const list = mpgGetClients();
+  const nomKey = (client.nom||'').trim().toLowerCase();
+  if(!nomKey) return null;
+  const idx = list.findIndex(c => (c.nom||'').trim().toLowerCase() === nomKey);
+  if(idx >= 0){
+    list[idx] = Object.assign({}, list[idx], client, { id: list[idx].id });
+  }else{
+    client.id = 'c' + Date.now() + Math.floor(Math.random()*1000);
+    list.push(client);
+  }
+  mpgSaveClients(list);
+  return idx >= 0 ? list[idx] : client;
+}
+function mpgFindClientByName(nom){
+  const nomKey = (nom||'').trim().toLowerCase();
+  if(!nomKey) return null;
+  return mpgGetClients().find(c => (c.nom||'').trim().toLowerCase() === nomKey) || null;
+}
+function mpgDeleteClient(id){
+  mpgSaveClients(mpgGetClients().filter(c => c.id !== id));
+}
+// Remplit un <datalist id="datalistId"> avec les noms de tous les clients enregistrés
+function mpgFillClientDatalist(datalistId){
+  const dl = document.getElementById(datalistId);
+  if(!dl) return;
+  dl.innerHTML = mpgGetClients().map(c => `<option value="${String(c.nom||'').replace(/"/g,'&quot;')}">`).join('');
+}
+
+// ══ HISTORIQUE DES DEVIS + PAIEMENTS ══
+function mpgGetDevisHistory(){
+  try{ return JSON.parse(localStorage.getItem('mpg_devis_history') || '[]'); }
+  catch(e){ return []; }
+}
+function mpgSaveDevisHistory(list){
+  localStorage.setItem('mpg_devis_history', JSON.stringify(list));
+}
+// Enregistre (ou met à jour) un devis validé dans l'historique, identifié par son numéro.
+function mpgSaveDevisRecord(record){
+  const list = mpgGetDevisHistory();
+  const idx = list.findIndex(d => d.numero === record.numero);
+  if(idx >= 0){
+    record.paiements = list[idx].paiements || [];
+    list[idx] = Object.assign({}, list[idx], record);
+  }else{
+    record.paiements = record.paiements || [];
+    list.push(record);
+  }
+  mpgSaveDevisHistory(list);
+  return record;
+}
+function mpgAddPayment(numero, paiement){
+  const list = mpgGetDevisHistory();
+  const idx = list.findIndex(d => d.numero === numero);
+  if(idx < 0) return null;
+  list[idx].paiements = list[idx].paiements || [];
+  list[idx].paiements.push(paiement);
+  mpgSaveDevisHistory(list);
+  return list[idx];
+}
+// 'paye' | 'partiel' | 'impaye'
+function mpgStatutPaiement(record){
+  const paye = (record.paiements||[]).reduce((s,p)=>s+(parseFloat(p.montant)||0),0);
+  const ttc = parseFloat(record.montantTTC)||0;
+  if(paye <= 0) return 'impaye';
+  if(paye >= ttc - 0.01) return 'paye';
+  return 'partiel';
+}
+function mpgTotalPaye(record){
+  return (record.paiements||[]).reduce((s,p)=>s+(parseFloat(p.montant)||0),0);
 }
 
 // Ouvre Gmail (compose) dans un nouvel onglet avec destinataire / sujet / corps pré-remplis.

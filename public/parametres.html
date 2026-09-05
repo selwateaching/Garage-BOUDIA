@@ -33,7 +33,11 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
 <div class="container">
   <header>
     <div class="titre">Paramètres <span>Garage</span></div>
-    <a class="btn-retour" href="index.html">← Retour</a>
+    <div style="display:flex;gap:8px;">
+      <a class="btn-retour" href="clients.html">👥 Clients</a>
+      <a class="btn-retour" href="recettes.html">💰 Recettes</a>
+      <a class="btn-retour" href="index.html">← Retour</a>
+    </div>
   </header>
 
   <section>
@@ -51,6 +55,20 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
           <button type="button" onclick="removeLogo()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le logo</button>
         </div>
       </div>
+    </div>
+    <div class="field">
+      <label>Tampon / cachet du garage</label>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div id="tampon-preview" style="width:64px;height:64px;background:var(--gris);border:2px solid var(--bordure);border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          <img id="tampon-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:none;">
+          <span id="tampon-placeholder" style="font-size:1.2rem;">🔏</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <input type="file" id="s-tampon-file" accept="image/*" style="padding:0;border:none;">
+          <button type="button" onclick="removeTampon()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le tampon</button>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:6px;">Apparaît près de la signature du garagiste sur les PDF (ordre de réparation, devis).</div>
     </div>
     <div class="field"><label>Nom du garage</label><input id="s-nom" placeholder="Ex : Garage El Fath"></div>
     <div class="field"><label>Adresse</label><input id="s-adresse" placeholder="Ex : Cité 500 Logts, Bir Mourad Raïs, Alger"></div>
@@ -84,24 +102,28 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
 <script src="assets/settings.js"></script>
 <script>
 let currentLogo = '';
+let currentTampon = '';
 
-function showLogoPreview(dataUrl){
-  const img=document.getElementById('logo-img'), ph=document.getElementById('logo-placeholder');
+function showImgPreview(dataUrl, imgId, phId){
+  const img=document.getElementById(imgId), ph=document.getElementById(phId);
   if(dataUrl){ img.src=dataUrl; img.style.display='block'; ph.style.display='none'; }
   else{ img.src=''; img.style.display='none'; ph.style.display='block'; }
 }
-
-function removeLogo(){
-  currentLogo='';
-  showLogoPreview('');
-  document.getElementById('s-logo-file').value='';
-}
+function removeLogo(){ currentLogo=''; showImgPreview('','logo-img','logo-placeholder'); document.getElementById('s-logo-file').value=''; }
+function removeTampon(){ currentTampon=''; showImgPreview('','tampon-img','tampon-placeholder'); document.getElementById('s-tampon-file').value=''; }
 
 document.getElementById('s-logo-file').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = ()=>{ currentLogo = reader.result; showLogoPreview(currentLogo); };
+  reader.onload = ()=>{ currentLogo = reader.result; showImgPreview(currentLogo,'logo-img','logo-placeholder'); };
+  reader.readAsDataURL(file);
+});
+document.getElementById('s-tampon-file').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{ currentTampon = reader.result; showImgPreview(currentTampon,'tampon-img','tampon-placeholder'); };
   reader.readAsDataURL(file);
 });
 
@@ -112,10 +134,12 @@ function loadAll(){
     if(el) el.value = s[k] === MPG_DEFAULTS[k] && !s[k] ? '' : (s[k] || '');
   });
   currentLogo = s.logo || '';
-  showLogoPreview(currentLogo);
+  currentTampon = s.tampon || '';
+  showImgPreview(currentLogo,'logo-img','logo-placeholder');
+  showImgPreview(currentTampon,'tampon-img','tampon-placeholder');
 }
 function saveAll(){
-  const data = { logo: currentLogo };
+  const data = { logo: currentLogo, tampon: currentTampon };
   ['nom','adresse','tel','email','nif','rc','ai','mecaA','mecaB','mecaC'].forEach(k=>{
     const el = document.getElementById('s-'+k);
     data[k] = el ? el.value.trim() : '';

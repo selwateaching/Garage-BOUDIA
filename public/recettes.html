@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recettes — MecaPulse</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="assets/settings.js"></script>
+<style>
+:root{--noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#2a2a2a;--vert:#4caf50;--rouge:#e53935;--orange:#ff9800;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
+.container{max-width:1000px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.titre{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.titre span{color:var(--accent);}
+.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-retour:hover{border-color:var(--texte2);color:var(--texte);}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
+.filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.filters button{padding:8px 16px;border:1px solid var(--bordure);background:var(--gris2);color:var(--texte2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.filters button.active{background:#3a2d00;border-color:var(--accent);color:var(--accent);}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--gris);border:1px solid var(--bordure);padding:16px 18px;}
+.stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);margin-bottom:6px;}
+.stat-value{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;}
+.stat-value.vert{color:var(--vert);}
+.stat-value.rouge{color:var(--rouge);}
+.stat-value.accent{color:var(--accent);}
+.card{background:var(--gris);border:1px solid var(--bordure);padding:20px;margin-bottom:24px;}
+table{width:100%;border-collapse:collapse;font-size:.83rem;}
+th{text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--texte2);border-bottom:1px solid var(--bordure);padding:8px 6px;}
+td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
+.badge{font-size:.62rem;padding:2px 9px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+.badge-paye{background:#1a3a1a;color:var(--vert);}
+.badge-partiel{background:#3a2d00;color:var(--orange);}
+.badge-impaye{background:#3a0f0f;color:var(--rouge);}
+.btn-pay{background:var(--accent);color:#000;border:none;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+.btn-pay:hover{background:#f5c800;}
+.empty{color:var(--texte2);font-style:italic;font-size:.85rem;padding:20px 0;text-align:center;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--gris);border:1px solid var(--bordure);border-radius:6px;width:100%;max-width:380px;padding:22px;}
+.modal h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:14px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);}
+input,select{background:var(--gris2);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:8px 10px;font-family:'Barlow',sans-serif;font-size:.85rem;outline:none;width:100%;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
+.btn-cancel{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+.btn-ok{background:var(--accent);color:#000;border:none;padding:8px 20px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+@media(max-width:650px){th:nth-child(3),td:nth-child(3){display:none;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="titre">Recettes <span>Garage</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="btn-retour" href="clients.html">👥 Clients</a>
+      <a class="btn-retour" href="parametres.html">⚙ Paramètres</a>
+      <a class="btn-retour" href="index.html">← Retour</a>
+    </div>
+  </header>
+
+  <div class="filters" id="filters">
+    <button data-p="jour" class="active" onclick="setPeriode('jour')">Aujourd'hui</button>
+    <button data-p="semaine" onclick="setPeriode('semaine')">Cette semaine</button>
+    <button data-p="mois" onclick="setPeriode('mois')">Ce mois</button>
+    <button data-p="tout" onclick="setPeriode('tout')">Tout</button>
+  </div>
+
+  <div class="cards">
+    <div class="stat-card"><div class="stat-label">Total encaissé</div><div class="stat-value vert" id="st-encaisse">0 DA</div></div>
+    <div class="stat-card"><div class="stat-label">Reste à encaisser</div><div class="stat-value rouge" id="st-impaye">0 DA</div></div>
+    <div class="stat-card"><div class="stat-label">Devis validés</div><div class="stat-value accent" id="st-count">0</div></div>
+  </div>
+
+  <div class="section-title">Répartition par mode de paiement</div>
+  <div class="card" id="repartition">—</div>
+
+  <div class="section-title">Devis validés</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Montant TTC</th><th>Payé</th><th>Statut</th><th></th></tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none;">Aucun devis validé pour l'instant. Valide un devis depuis la page Devis pour qu'il apparaisse ici.</div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-pay">
+  <div class="modal">
+    <h3>💰 Enregistrer un paiement</h3>
+    <div class="field"><label>Montant (DA)</label><input type="number" id="p-montant" min="0" step="0.01"></div>
+    <div class="field"><label>Mode de paiement</label>
+      <select id="p-mode"><option>Espèces</option><option>Virement</option><option>CCP</option><option>Chèque</option></select>
+    </div>
+    <div class="field"><label>Date</label><input type="date" id="p-date"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-ok" onclick="confirmPayment()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let periode = 'jour';
+let payingNumero = null;
+
+function setPeriode(p){
+  periode = p;
+  document.querySelectorAll('#filters button').forEach(b=>b.classList.toggle('active', b.dataset.p===p));
+  render();
+}
+
+function inPeriode(dateStr){
+  if(periode==='tout') return true;
+  const d = new Date(dateStr), now = new Date();
+  if(periode==='jour') return d.toDateString()===now.toDateString();
+  if(periode==='semaine'){
+    const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay()+6)%7)); monday.setHours(0,0,0,0);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
+    return d>=monday && d<=sunday;
+  }
+  if(periode==='mois') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  return true;
+}
+
+function fmtDA(n){ return (n||0).toFixed(2).replace('.',',')+' DA'; }
+
+function render(){
+  const all = mpgGetDevisHistory();
+  const list = all.filter(r => inPeriode(r.date));
+
+  let encaisse=0, resteImpaye=0, modes={};
+  list.forEach(r=>{
+    const paye = mpgTotalPaye(r);
+    encaisse += paye;
+    resteImpaye += Math.max(0, (parseFloat(r.montantTTC)||0) - paye);
+    (r.paiements||[]).forEach(p=>{ modes[p.mode] = (modes[p.mode]||0) + (parseFloat(p.montant)||0); });
+  });
+
+  document.getElementById('st-encaisse').textContent = fmtDA(encaisse);
+  document.getElementById('st-impaye').textContent = fmtDA(resteImpaye);
+  document.getElementById('st-count').textContent = list.length;
+
+  const repEl = document.getElementById('repartition');
+  const modeKeys = Object.keys(modes);
+  repEl.innerHTML = modeKeys.length
+    ? modeKeys.map(m=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bordure);"><span>${m}</span><strong>${fmtDA(modes[m])}</strong></div>`).join('')
+    : '<span style="color:var(--texte2);font-style:italic;">Aucun paiement enregistré sur cette période.</span>';
+
+  const body = document.getElementById('tbl-body');
+  document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+  body.innerHTML = list.slice().reverse().map(r=>{
+    const paye = mpgTotalPaye(r);
+    const statut = mpgStatutPaiement(r);
+    const badgeClass = statut==='paye'?'badge-paye':statut==='partiel'?'badge-partiel':'badge-impaye';
+    const badgeText = statut==='paye'?'Payé':statut==='partiel'?'Partiel':'Impayé';
+    return `<tr>
+      <td>${escHtml(r.numero)}</td>
+      <td>${escHtml(r.clientNom||'—')}</td>
+      <td>${new Date(r.date).toLocaleDateString('fr-FR')}</td>
+      <td>${fmtDA(r.montantTTC)}</td>
+      <td>${fmtDA(paye)}</td>
+      <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+      <td>${statut!=='paye' ? `<button class="btn-pay" onclick="openModal('${r.numero}')">+ Paiement</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(numero){
+  payingNumero = numero;
+  document.getElementById('p-montant').value='';
+  document.getElementById('p-date').valueAsDate = new Date();
+  document.getElementById('modal-pay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal-pay').classList.remove('open'); payingNumero=null; }
+
+function confirmPayment(){
+  const montant = parseFloat(document.getElementById('p-montant').value);
+  if(!montant || montant<=0){ alert('Montant invalide'); return; }
+  mpgAddPayment(payingNumero, { montant, mode:document.getElementById('p-mode').value, date:document.getElementById('p-date').value });
+  closeModal();
+  render();
+}
+
+function escHtml(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+render();
+</script>
+</body>
+</html>

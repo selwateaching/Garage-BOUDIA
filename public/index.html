@@ -113,7 +113,11 @@ canvas.sig-canvas{width:100%;height:110px;background:#111;cursor:crosshair;displ
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;color:var(--texte);" data-mpg="nom">MecaPulseGarage</div>
     <div data-mpg="adresse">217 Chem. de Boudou, 31140 Launaguet</div>
     <div>NIF : <input type="text" id="nif" data-mpg="nif" placeholder="N° NIF" style="width:130px;background:transparent;border:none;border-bottom:1px solid var(--bordure);color:var(--texte);font-size:0.78rem;outline:none;padding:2px 4px;"></div>
-    <div style="margin-top:6px;"><a href="parametres.html" style="color:var(--accent);font-size:0.7rem;text-decoration:none;letter-spacing:1px;">⚙ Paramètres du garage</a></div>
+    <div style="margin-top:6px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <a href="clients.html" style="color:var(--accent);font-size:0.7rem;text-decoration:none;letter-spacing:1px;">👥 Clients</a>
+      <a href="recettes.html" style="color:var(--accent);font-size:0.7rem;text-decoration:none;letter-spacing:1px;">💰 Recettes</a>
+      <a href="parametres.html" style="color:var(--accent);font-size:0.7rem;text-decoration:none;letter-spacing:1px;">⚙ Paramètres</a>
+    </div>
   </div>
 </header>
 
@@ -137,7 +141,8 @@ canvas.sig-canvas{width:100%;height:110px;background:#111;cursor:crosshair;displ
   <section>
     <div class="section-title">Client</div>
     <div class="grid-2">
-      <div class="field"><label>Nom</label><input type="text" id="nomClient" placeholder="Mme DUPONT Marie"></div>
+      <div class="field"><label>Nom</label><input type="text" id="nomClient" list="clients-list-or" placeholder="Tape un nom — clients déjà enregistrés suggérés" oninput="tryAutofillClientOR()"></div>
+      <datalist id="clients-list-or"></datalist>
       <div class="field"><label>Adresse</label><input type="text" id="adresseClient" placeholder="12 rue de la Paix"></div>
       <div class="field"><label>Email</label><input type="email" id="emailClient" placeholder="client@email.fr"></div>
       <div class="field"><label>Tél</label><input type="tel" id="telClient" placeholder="06 00 00 00 00"></div>
@@ -339,9 +344,10 @@ canvas.sig-canvas{width:100%;height:110px;background:#111;cursor:crosshair;displ
         <span class="sig-note">Je confirme l'état ci-dessus</span>
       </div>
     </div>
-    <div class="sig-box">
+    <div class="sig-box" style="position:relative;">
       <h4>Signature du garagiste</h4>
       <canvas class="sig-canvas" id="sigGarage" width="340" height="110"></canvas>
+      <img id="tamponDisplay" src="" alt="" style="position:absolute;right:20px;bottom:44px;width:60px;height:60px;object-fit:contain;opacity:.85;pointer-events:none;display:none;">
       <div class="sig-actions">
         <button class="btn-clear" onclick="clearSig('sigGarage')">✕ Effacer</button>
         <span class="sig-note">Prise en charge confirmée</span>
@@ -384,6 +390,16 @@ if(!document.getElementById('numOR').value) document.getElementById('numOR').val
 mpgApplySettings();
 mpgBindAutoSave();
 mpgApplyLogo('garageLogo','garageLogoFallback');
+mpgApplyTampon('tamponDisplay');
+mpgFillClientDatalist('clients-list-or');
+
+function tryAutofillClientOR(){
+  const c = mpgFindClientByName(document.getElementById('nomClient').value);
+  if(!c) return;
+  document.getElementById('adresseClient').value = c.adresse||'';
+  document.getElementById('telClient').value = c.tel||'';
+  document.getElementById('emailClient').value = c.email||'';
+}
 
 function toggleON(btn,id){document.getElementById(id).querySelectorAll('button').forEach(b=>b.classList.remove('active-oui','active-non'));btn.classList.add('active-oui');}
 function toggleNON(btn,id){document.getElementById(id).querySelectorAll('button').forEach(b=>b.classList.remove('active-oui','active-non'));btn.classList.add('active-non');}
@@ -459,6 +475,9 @@ function sauverEtAllerAuDevis(){
     moteur       : document.getElementById('codeMoteur')?.value||'',
     reparations  : document.getElementById('reparations')?.value||''
   };
+  if(data.clientNom && !mpgFindClientByName(data.clientNom)){
+    mpgUpsertClient({ type:'particulier', nom:data.clientNom, adresse:data.clientAdresse, tel:data.clientTel, email:data.clientEmail });
+  }
   localStorage.setItem('or_to_devis',JSON.stringify(data));
   window.location.href='devis.html';
 }
@@ -536,6 +555,8 @@ async function telechargerPDF(){
     pdf.setFillColor(248,248,248);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.3);pdf.rect(ML,y,sW,sH,'FD');pdf.rect(ML+sW+4,y,sW,sH,'FD');
     pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(80,80,80);pdf.text('SIGNATURE DU CLIENT',ML+2,y+4);pdf.text('SIGNATURE DU GARAGISTE',ML+sW+6,y+4);
     if(sC)pdf.addImage(sC,'PNG',ML+1,y+5,sW-2,sH-8);if(sG)pdf.addImage(sG,'PNG',ML+sW+5,y+5,sW-2,sH-8);
+    const _mpgS=mpgGetSettings();
+    if(_mpgS.tampon){try{const tFmt=(_mpgS.tampon.match(/^data:image\/(\w+);/)||[])[1];pdf.addImage(_mpgS.tampon,(tFmt?tFmt.toUpperCase().replace('JPG','JPEG'):'PNG'),ML+sW+4+sW-16,y+2,14,14);}catch(e){}}
     pdf.setFont('helvetica','italic');pdf.setFontSize(6.5);pdf.setTextColor(120,120,120);pdf.text('Je confirme l\'état ci-dessus',ML+2,y+sH-2);pdf.text('Prise en charge confirmée',ML+sW+6,y+sH-2);y+=sH+8;
     const total=pdf.internal.getNumberOfPages();for(let i=1;i<=total;i++){pdf.setPage(i);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.3);pdf.line(ML,PH-10,PW-MR,PH-10);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);pdf.setTextColor(130,130,130);pdf.text((g('nomGarage')||'Garage')+' — '+(g('adresseGarage')||'')+' — '+(g('telGarage')||''),ML,PH-6);pdf.text('Page '+i+'/'+total,PW-MR,PH-6,{align:'right'});}
     pdf.save('OR_'+(g('immat')||'vehicule')+'_'+(g('dateReception')||new Date().toISOString().slice(0,10))+'.pdf');showToast('✅ PDF généré !');

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clients — MecaPulse</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="assets/settings.js"></script>
+<style>
+:root{--noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#2a2a2a;--vert:#4caf50;--rouge:#e53935;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
+.container{max-width:900px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.titre{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.titre span{color:var(--accent);}
+.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-retour:hover{border-color:var(--texte2);color:var(--texte);}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
+.card{background:var(--gris);border:1px solid var(--bordure);padding:20px;margin-bottom:28px;}
+.type-toggle{display:flex;gap:0;margin-bottom:14px;width:fit-content;}
+.type-toggle button{padding:8px 18px;border:1px solid var(--bordure);background:transparent;color:var(--texte2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.type-toggle button:first-child{border-right:none;}
+.type-toggle button.active{background:#3a2d00;border-color:var(--accent);color:var(--accent);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:500;}
+input{background:var(--gris2);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;width:100%;}
+input:focus{border-bottom-color:var(--accent);}
+.btn-save{background:var(--accent);color:#000;border:none;padding:12px 24px;font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.btn-save:hover{background:#f5c800;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th{text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--texte2);border-bottom:1px solid var(--bordure);padding:8px 6px;}
+td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
+.badge{font-size:.62rem;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;}
+.badge-part{background:#1a2a3a;color:#6fa8dc;}
+.badge-ent{background:#2d1a00;color:var(--accent);}
+.btn-x{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:4px 10px;font-size:.68rem;cursor:pointer;}
+.btn-x:hover{border-color:var(--rouge);color:var(--rouge);}
+.empty{color:var(--texte2);font-style:italic;font-size:.85rem;padding:20px 0;text-align:center;}
+#toast{position:fixed;bottom:24px;right:24px;background:#163d16;color:#fff;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:1px;display:none;z-index:999;border-left:4px solid var(--vert);}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr;} table{font-size:.75rem;} th:nth-child(4),td:nth-child(4){display:none;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="titre">Clients <span>Garage</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="btn-retour" href="parametres.html">⚙ Paramètres</a>
+      <a class="btn-retour" href="recettes.html">💰 Recettes</a>
+      <a class="btn-retour" href="index.html">← Retour</a>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="section-title">Ajouter un client</div>
+    <div class="type-toggle" id="type-toggle">
+      <button type="button" class="active" data-type="particulier" onclick="setType('particulier')">Particulier</button>
+      <button type="button" data-type="entreprise" onclick="setType('entreprise')">Entreprise</button>
+    </div>
+    <div id="fields-particulier">
+      <div class="grid-2">
+        <div class="field"><label>Nom complet</label><input id="f-nom"></div>
+        <div class="field"><label>Téléphone</label><input id="f-tel"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Email</label><input id="f-email" type="email"></div>
+        <div class="field"><label>Adresse</label><input id="f-adresse"></div>
+      </div>
+    </div>
+    <div id="fields-entreprise" style="display:none;">
+      <div class="grid-2">
+        <div class="field"><label>Raison sociale</label><input id="fe-nom"></div>
+        <div class="field"><label>Nom du contact</label><input id="fe-contact"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Téléphone</label><input id="fe-tel"></div>
+        <div class="field"><label>Email</label><input id="fe-email" type="email"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>NIF</label><input id="fe-nif"></div>
+        <div class="field"><label>RC</label><input id="fe-rc"></div>
+      </div>
+      <div class="field"><label>Adresse</label><input id="fe-adresse"></div>
+    </div>
+    <button class="btn-save" onclick="addClient()">💾 Enregistrer le client</button>
+  </div>
+
+  <div class="section-title">Liste des clients</div>
+  <div class="card">
+    <table id="tbl">
+      <thead><tr><th>Type</th><th>Nom</th><th>Téléphone</th><th>Email</th><th></th></tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none;">Aucun client enregistré pour l'instant.</div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+let curType = 'particulier';
+function setType(t){
+  curType = t;
+  document.querySelectorAll('#type-toggle button').forEach(b=>b.classList.toggle('active', b.dataset.type===t));
+  document.getElementById('fields-particulier').style.display = t==='particulier' ? 'block' : 'none';
+  document.getElementById('fields-entreprise').style.display = t==='entreprise' ? 'block' : 'none';
+}
+
+function addClient(){
+  let client;
+  if(curType==='particulier'){
+    const nom=document.getElementById('f-nom').value.trim();
+    if(!nom){ alert('Le nom est requis'); return; }
+    client={ type:'particulier', nom, tel:document.getElementById('f-tel').value.trim(),
+      email:document.getElementById('f-email').value.trim(), adresse:document.getElementById('f-adresse').value.trim() };
+  }else{
+    const nom=document.getElementById('fe-nom').value.trim();
+    if(!nom){ alert('La raison sociale est requise'); return; }
+    client={ type:'entreprise', nom, contact:document.getElementById('fe-contact').value.trim(),
+      tel:document.getElementById('fe-tel').value.trim(), email:document.getElementById('fe-email').value.trim(),
+      nif:document.getElementById('fe-nif').value.trim(), rc:document.getElementById('fe-rc').value.trim(),
+      adresse:document.getElementById('fe-adresse').value.trim() };
+  }
+  mpgUpsertClient(client);
+  ['f-nom','f-tel','f-email','f-adresse','fe-nom','fe-contact','fe-tel','fe-email','fe-nif','fe-rc','fe-adresse'].forEach(id=>document.getElementById(id).value='');
+  renderList();
+  const t=document.getElementById('toast');
+  t.textContent='✅ Client enregistré';t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+
+function removeClient(id){
+  if(!confirm('Supprimer ce client ?')) return;
+  mpgDeleteClient(id);
+  renderList();
+}
+
+function renderList(){
+  const list = mpgGetClients();
+  const body = document.getElementById('tbl-body');
+  document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('tbl').style.display = list.length ? 'table' : 'none';
+  body.innerHTML = list.map(c=>`
+    <tr>
+      <td><span class="badge ${c.type==='entreprise'?'badge-ent':'badge-part'}">${c.type==='entreprise'?'Entreprise':'Particulier'}</span></td>
+      <td>${escHtml(c.nom||'')}${c.contact?' <span style="color:var(--texte2);font-size:.78rem;">('+escHtml(c.contact)+')</span>':''}</td>
+      <td>${escHtml(c.tel||'—')}</td>
+      <td>${escHtml(c.email||'—')}</td>
+      <td><button class="btn-x" onclick="removeClient('${c.id}')">✕</button></td>
+    </tr>`).join('');
+}
+function escHtml(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+renderList();
+</script>
+</body>
+</html>
