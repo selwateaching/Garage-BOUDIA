@@ -97,6 +97,12 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
   </section>
 
   <button class="btn-save" onclick="saveAll()">💾 Enregistrer</button>
+
+  <section style="margin-top:34px;">
+    <div class="section-title">Zone de test</div>
+    <div class="hint">À utiliser avant de remettre l'application à un client, ou avant une démonstration : efface les clients, factures, rendez-vous et numéros créés pendant les essais sur ce poste. Le nom, le logo et les coordonnées du garage ci-dessus sont conservés.</div>
+    <button type="button" onclick="resetTestData()" style="width:100%;background:transparent;border:1px solid var(--bordure);color:#e57373;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">🗑 Réinitialiser les données de test</button>
+  </section>
 </div>
 <div id="toast"></div>
 
@@ -150,6 +156,14 @@ function saveAll(){
   t.textContent='✅ Paramètres enregistrés';t.style.display='block';
   setTimeout(()=>t.style.display='none',3000);
 }
+function resetTestData(){
+  if(!confirm("Effacer tous les clients, factures, rendez-vous et numéros de test sur ce poste ?\n\nLes réglages du garage (nom, logo, coordonnées) seront conservés.\n\nCette action est irréversible.")) return;
+  ['mpg_clients','mpg_factures','mpg_rdvs','or_n','devis_n','facture_n'].forEach(k=>localStorage.removeItem(k));
+  const t=document.getElementById('toast');
+  t.textContent='✅ Données de test effacées';t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
 mpgSetPageTitle('Paramètres');
 loadAll();
 </script>
