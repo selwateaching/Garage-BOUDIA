@@ -108,18 +108,24 @@ function mpgFillClientDatalist(datalistId){
   dl.innerHTML = mpgGetClients().map(c => `<option value="${String(c.nom||'').replace(/"/g,'&quot;')}">`).join('');
 }
 
-// ══ HISTORIQUE DES DEVIS + PAIEMENTS ══
-function mpgGetDevisHistory(){
-  try{ return JSON.parse(localStorage.getItem('mpg_devis_history') || '[]'); }
+// ══ FACTURES (émises à partir d'un devis signé ou validé manuellement) + PAIEMENTS ══
+function mpgGetFactures(){
+  try{ return JSON.parse(localStorage.getItem('mpg_factures') || '[]'); }
   catch(e){ return []; }
 }
-function mpgSaveDevisHistory(list){
-  localStorage.setItem('mpg_devis_history', JSON.stringify(list));
+function mpgSaveFactures(list){
+  localStorage.setItem('mpg_factures', JSON.stringify(list));
 }
-// Enregistre (ou met à jour) un devis validé dans l'historique, identifié par son numéro.
-function mpgSaveDevisRecord(record){
-  const list = mpgGetDevisHistory();
-  const idx = list.findIndex(d => d.numero === record.numero);
+// Génère le prochain numéro de facture (F-001, F-002...)
+function mpgNextFactureNum(){
+  let n=parseInt(localStorage.getItem('facture_n')||'0')+1;
+  localStorage.setItem('facture_n', n);
+  return 'F-'+String(n).padStart(3,'0');
+}
+// Enregistre (ou met à jour) une facture, identifiée par son numéro.
+function mpgSaveFacture(record){
+  const list = mpgGetFactures();
+  const idx = list.findIndex(f => f.numero === record.numero);
   if(idx >= 0){
     record.paiements = list[idx].paiements || [];
     list[idx] = Object.assign({}, list[idx], record);
@@ -127,16 +133,16 @@ function mpgSaveDevisRecord(record){
     record.paiements = record.paiements || [];
     list.push(record);
   }
-  mpgSaveDevisHistory(list);
+  mpgSaveFactures(list);
   return record;
 }
 function mpgAddPayment(numero, paiement){
-  const list = mpgGetDevisHistory();
-  const idx = list.findIndex(d => d.numero === numero);
+  const list = mpgGetFactures();
+  const idx = list.findIndex(f => f.numero === numero);
   if(idx < 0) return null;
   list[idx].paiements = list[idx].paiements || [];
   list[idx].paiements.push(paiement);
-  mpgSaveDevisHistory(list);
+  mpgSaveFactures(list);
   return list[idx];
 }
 // 'paye' | 'partiel' | 'impaye'

@@ -48,7 +48,7 @@ input,select{background:var(--gris2);border:1px solid var(--bordure);border-bott
 .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
 .btn-cancel{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
 .btn-ok{background:var(--accent);color:#000;border:none;padding:8px 20px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
-@media(max-width:650px){th:nth-child(3),td:nth-child(3){display:none;}}
+@media(max-width:650px){th:nth-child(2),td:nth-child(2),th:nth-child(4),td:nth-child(4){display:none;}}
 </style>
 </head>
 <body>
@@ -72,19 +72,19 @@ input,select{background:var(--gris2);border:1px solid var(--bordure);border-bott
   <div class="cards">
     <div class="stat-card"><div class="stat-label">Total encaissé</div><div class="stat-value vert" id="st-encaisse">0 DA</div></div>
     <div class="stat-card"><div class="stat-label">Reste à encaisser</div><div class="stat-value rouge" id="st-impaye">0 DA</div></div>
-    <div class="stat-card"><div class="stat-label">Devis validés</div><div class="stat-value accent" id="st-count">0</div></div>
+    <div class="stat-card"><div class="stat-label">Factures émises</div><div class="stat-value accent" id="st-count">0</div></div>
   </div>
 
   <div class="section-title">Répartition par mode de paiement</div>
   <div class="card" id="repartition">—</div>
 
-  <div class="section-title">Devis validés</div>
+  <div class="section-title">Factures émises</div>
   <div class="card">
     <table>
-      <thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Montant TTC</th><th>Payé</th><th>Statut</th><th></th></tr></thead>
+      <thead><tr><th>N° Facture</th><th>Devis d'origine</th><th>Client</th><th>Date</th><th>Montant TTC</th><th>Payé</th><th>Statut</th><th></th></tr></thead>
       <tbody id="tbl-body"></tbody>
     </table>
-    <div id="empty" class="empty" style="display:none;">Aucun devis validé pour l'instant. Valide un devis depuis la page Devis pour qu'il apparaisse ici.</div>
+    <div id="empty" class="empty" style="display:none;">Aucune facture émise pour l'instant. Sur la page Devis, signe (ou coche la validation manuelle) puis clique "🧾 Émettre la facture" pour qu'elle apparaisse ici.</div>
   </div>
 </div>
 
@@ -129,7 +129,7 @@ function inPeriode(dateStr){
 function fmtDA(n){ return (n||0).toFixed(2).replace('.',',')+' DA'; }
 
 function render(){
-  const all = mpgGetDevisHistory();
+  const all = mpgGetFactures();
   const list = all.filter(r => inPeriode(r.date));
 
   let encaisse=0, resteImpaye=0, modes={};
@@ -159,6 +159,7 @@ function render(){
     const badgeText = statut==='paye'?'Payé':statut==='partiel'?'Partiel':'Impayé';
     return `<tr>
       <td>${escHtml(r.numero)}</td>
+      <td>${escHtml(r.devisNumero||'—')}</td>
       <td>${escHtml(r.clientNom||'—')}</td>
       <td>${new Date(r.date).toLocaleDateString('fr-FR')}</td>
       <td>${fmtDA(r.montantTTC)}</td>
