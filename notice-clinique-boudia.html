@@ -1,0 +1,449 @@
+<title>Notice Clinique Auto Boudia</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --paper:#eef0f0;
+  --surface:#ffffff;
+  --ink:#171a1c;
+  --ink-soft:#4d5559;
+  --line:#d7dcdc;
+  --accent:#c98a06;
+  --accent-ink:#7a5404;
+  --steel:#33505f;
+  --steel-soft:#5c7885;
+  --ok-bg:#e7f2e6;
+  --ok-ink:#2f5d33;
+  --warn-bg:#fbeee0;
+  --warn-ink:#8a4a12;
+  --radius:3px;
+  font-size:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14181a;
+    --surface:#1c2226;
+    --ink:#eef1f0;
+    --ink-soft:#a9b4b6;
+    --line:#2c3438;
+    --accent:#f0b429;
+    --accent-ink:#f0b429;
+    --steel:#8fb4c4;
+    --steel-soft:#6f96a6;
+    --ok-bg:#1c2c1e;
+    --ok-ink:#8fce93;
+    --warn-bg:#2e2013;
+    --warn-ink:#e3ab6c;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14181a;
+  --surface:#1c2226;
+  --ink:#eef1f0;
+  --ink-soft:#a9b4b6;
+  --line:#2c3438;
+  --accent:#f0b429;
+  --accent-ink:#f0b429;
+  --steel:#8fb4c4;
+  --steel-soft:#6f96a6;
+  --ok-bg:#1c2c1e;
+  --ok-ink:#8fce93;
+  --warn-bg:#2e2013;
+  --warn-ink:#e3ab6c;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  line-height:1.6;
+}
+.wrap{max-width:840px;margin:0 auto;padding:0 24px 90px;}
+
+/* ── EN-TÊTE ── */
+.masthead{
+  padding:38px 0 26px;
+  border-bottom:3px solid var(--ink);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+  flex-wrap:wrap;
+}
+.masthead-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--steel-soft);
+  margin-bottom:8px;
+}
+.masthead h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;
+  font-size:clamp(2rem,5vw,2.7rem);
+  letter-spacing:.01em;
+  text-transform:uppercase;
+  line-height:1.02;
+  margin:0;
+  text-wrap:balance;
+}
+.masthead h1 span{color:var(--accent-ink);}
+.plate{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.82rem;
+  color:var(--ink-soft);
+  border:1.5px solid var(--line);
+  border-radius:var(--radius);
+  padding:9px 13px;
+  background:var(--surface);
+  white-space:nowrap;
+}
+.plate a{color:var(--steel);text-decoration:none;font-weight:600;}
+.plate a:hover{text-decoration:underline;}
+
+.lede{
+  padding:22px 0 8px;
+  font-size:1.05rem;
+  color:var(--ink-soft);
+  max-width:62ch;
+}
+.lede strong{color:var(--ink);}
+
+/* ── SOMMAIRE ── */
+.toc{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  margin:28px 0 48px;
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.toc a{
+  background:var(--surface);
+  padding:12px 14px;
+  text-decoration:none;
+  color:var(--ink);
+  font-size:.82rem;
+  display:flex;
+  gap:9px;
+  align-items:baseline;
+}
+.toc a:hover{background:var(--paper);}
+.toc em{
+  font-family:'IBM Plex Mono',monospace;
+  font-style:normal;
+  color:var(--accent-ink);
+  font-weight:600;
+  font-size:.78rem;
+}
+
+/* ── ÉTAPES ── */
+.step{
+  display:grid;
+  grid-template-columns:64px 1fr;
+  gap:22px;
+  padding:34px 0;
+  border-bottom:1px solid var(--line);
+  scroll-margin-top:20px;
+}
+.step:last-of-type{border-bottom:none;}
+.step-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:1.1rem;
+  color:var(--accent-ink);
+  border:1.5px solid var(--line);
+  border-radius:50%;
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);
+}
+.step h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:1.5rem;
+  text-transform:uppercase;
+  letter-spacing:.01em;
+  margin:2px 0 4px;
+  text-wrap:balance;
+}
+.step .sub{
+  font-size:.82rem;
+  color:var(--steel-soft);
+  font-family:'IBM Plex Mono',monospace;
+  margin-bottom:14px;
+}
+.step p{margin:0 0 12px;max-width:62ch;}
+.step ol,.step ul{margin:0 0 14px;padding-left:1.15em;max-width:60ch;}
+.step li{margin-bottom:6px;}
+.step li::marker{color:var(--steel-soft);font-family:'IBM Plex Mono',monospace;font-size:.85em;}
+
+kbd{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.86em;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:1px 6px;
+  color:var(--ink);
+}
+
+.callout{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--steel);
+  border-radius:var(--radius);
+  padding:13px 16px;
+  font-size:.9rem;
+  color:var(--ink-soft);
+  max-width:60ch;
+}
+.callout strong{color:var(--ink);}
+.callout.warn{border-left-color:var(--warn-ink);background:var(--warn-bg);color:var(--warn-ink);}
+.callout.warn strong{color:var(--warn-ink);}
+
+/* ── CHECKLIST FINALE ── */
+.checklist-section{padding:40px 0 10px;}
+.checklist-section h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;
+  font-size:1.7rem;
+  text-transform:uppercase;
+  margin:0 0 6px;
+}
+.checklist-section .sub{color:var(--ink-soft);margin-bottom:22px;max-width:60ch;}
+.checklist{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.check-row{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:13px 16px;
+  border-bottom:1px solid var(--line);
+  font-size:.92rem;
+}
+.check-row:last-child{border-bottom:none;}
+.check-row input[type="checkbox"]{
+  width:18px;height:18px;
+  accent-color:var(--accent-ink);
+  margin-top:1px;
+  flex-shrink:0;
+}
+.check-row label{cursor:pointer;}
+.check-row.done label{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--line);}
+.check-code{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--steel-soft);margin-right:2px;}
+
+/* ── AVERTISSEMENTS ── */
+.warnbox{
+  margin-top:44px;
+  background:var(--warn-bg);
+  border:1px solid var(--warn-ink);
+  border-radius:var(--radius);
+  padding:20px 22px;
+}
+.warnbox h3{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  font-size:1.05rem;
+  color:var(--warn-ink);
+  margin:0 0 10px;
+}
+.warnbox ul{margin:0;padding-left:1.2em;color:var(--warn-ink);}
+.warnbox li{margin-bottom:7px;}
+
+footer{
+  margin-top:56px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  font-size:.78rem;
+  color:var(--steel-soft);
+  font-family:'IBM Plex Mono',monospace;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+
+@media(max-width:520px){
+  .step{grid-template-columns:40px 1fr;gap:14px;}
+  .step-num{width:32px;height:32px;font-size:.85rem;}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="masthead-eyebrow">Notice d'utilisation — v1</div>
+      <h1>Clinique Auto <span>Boudia</span></h1>
+    </div>
+    <div class="plate">app :: <a href="https://mecapulse-garage.onrender.com" target="_blank" rel="noopener">mecapulse-garage.onrender.com</a></div>
+  </div>
+
+  <p class="lede">Ce document accompagne le test de l'application de gestion d'atelier. Suivez les étapes <strong>dans l'ordre</strong> une première fois — c'est le circuit réel d'un véhicule, de sa réception à l'encaissement.</p>
+
+  <nav class="toc">
+    <a href="#etape-0"><em>00</em> Réglages</a>
+    <a href="#etape-1"><em>01</em> Réparation</a>
+    <a href="#etape-2"><em>02</em> Devis</a>
+    <a href="#etape-3"><em>03</em> Facture</a>
+    <a href="#etape-4"><em>04</em> Paiement</a>
+    <a href="#etape-5"><em>05</em> Clients</a>
+    <a href="#etape-6"><em>06</em> Planning</a>
+  </nav>
+
+  <section class="step" id="etape-0">
+    <div class="step-num">00</div>
+    <div>
+      <h2>Régler le garage — une seule fois</h2>
+      <div class="sub">Page Paramètres</div>
+      <p>Avant tout essai, on identifie l'atelier. Ces informations se répercutent automatiquement sur l'ordre de réparation, le devis et la facture.</p>
+      <ol>
+        <li>Ouvrez <kbd>⚙ Paramètres</kbd> depuis n'importe quelle page.</li>
+        <li>Ajoutez le <strong>logo</strong> et, si vous en avez un, le <strong>tampon</strong> du garage.</li>
+        <li>Renseignez nom, adresse, téléphone, email, et si disponibles <strong>NIF</strong> / <strong>RC</strong>.</li>
+        <li>Cliquez <kbd>💾 Enregistrer</kbd>.</li>
+      </ol>
+      <div class="callout"><strong>À savoir :</strong> ce réglage est propre à cet ordinateur et à ce navigateur — il ne se répète pas ailleurs automatiquement.</div>
+    </div>
+  </section>
+
+  <section class="step" id="etape-1">
+    <div class="step-num">01</div>
+    <div>
+      <h2>Réception du véhicule</h2>
+      <div class="sub">Ordre de réparation — numéroté automatiquement <span style="color:var(--accent-ink)">OR-00001</span></div>
+      <p>C'est le constat d'entrée : état du véhicule, niveau de réservoir, dommages repérés sur les schémas, réparations à prévoir.</p>
+      <ol>
+        <li>Dans le champ <strong>Client</strong>, tapez un nom : si le client existe déjà, ses coordonnées se remplissent seules.</li>
+        <li>Complétez immatriculation, marque, kilométrage.</li>
+        <li>Sur les 4 schémas du véhicule, sélectionnez un type de dommage (<em>Enfoncement / Rayure / Cassé</em>) puis dessinez son emplacement.</li>
+        <li>Faites signer le client et le garagiste dans les cadres prévus.</li>
+        <li>Cliquez <kbd>📋 Passer au devis →</kbd> — les informations saisies s'y reportent automatiquement.</li>
+      </ol>
+      <div class="callout">Le bouton <kbd>🌙 Traduire en arabe</kbd> produit un second PDF pour le mécanicien, réparations traduites automatiquement.</div>
+    </div>
+  </section>
+
+  <section class="step" id="etape-2">
+    <div class="step-num">02</div>
+    <div>
+      <h2>Chiffrer le devis</h2>
+      <div class="sub">Devis — numéroté <span style="color:var(--accent-ink)">D-001</span>, distinct de la facture</div>
+      <p>Le devis est une estimation : il peut être modifié, réimprimé, sans conséquence sur vos recettes.</p>
+      <ol>
+        <li>Précisez si le client est <strong>Particulier</strong> ou <strong>Entreprise</strong> (raison sociale, NIF, RC s'affichent pour une entreprise).</li>
+        <li>Ajoutez les lignes de <strong>Main-d'œuvre</strong> et de <strong>Pièces</strong> — le total HT / TVA 19 % / TTC se calcule seul, en dinars (DA).</li>
+        <li>Téléchargez-le avec <kbd>⬇ Télécharger PDF</kbd>, ou ouvrez Gmail pré-rempli avec <kbd>✉ Envoyer au client</kbd> (le PDF est à joindre à la main).</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step" id="etape-3">
+    <div class="step-num">03</div>
+    <div>
+      <h2>Émettre la facture</h2>
+      <div class="sub">Facture — numérotée séparément <span style="color:var(--accent-ink)">F-001</span></div>
+      <p>La facture ne peut être émise qu'une fois le devis <strong>accepté</strong> par le client — c'est ce qui déclenche son entrée dans vos recettes.</p>
+      <ol>
+        <li>Faites signer le client dans le cadre de signature.</li>
+        <li>Si la signature électronique ne fonctionne pas (écran, souris…), cochez <kbd>Validation manuelle</kbd> à la place.</li>
+        <li>Cliquez <kbd>🧾 Émettre la facture</kbd> — le PDF de facture se télécharge, référençant le devis d'origine.</li>
+      </ol>
+      <div class="callout warn"><strong>Sans signature ni case cochée, la facture est refusée</strong> — c'est volontaire, pour éviter de compter des brouillons dans les recettes.</div>
+    </div>
+  </section>
+
+  <section class="step" id="etape-4">
+    <div class="step-num">04</div>
+    <div>
+      <h2>Encaisser et suivre les recettes</h2>
+      <div class="sub">Page Recettes</div>
+      <p>Chaque facture émise y apparaît, avec son statut de paiement.</p>
+      <ol>
+        <li>Repérez la facture dans la liste — statut <strong>Impayé</strong> par défaut.</li>
+        <li>Cliquez <kbd>+ Paiement</kbd>, saisissez le montant et le mode (Espèces / Virement / CCP / Chèque).</li>
+        <li>Le statut passe à <strong>Partiel</strong> puis <strong>Payé</strong> selon le cumul réglé.</li>
+        <li>Filtrez par <em>Aujourd'hui / Cette semaine / Ce mois / Tout</em> pour voir le total encaissé et le reste dû.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step" id="etape-5">
+    <div class="step-num">05</div>
+    <div>
+      <h2>Retrouver un client</h2>
+      <div class="sub">Page Clients</div>
+      <p>Chaque nouveau nom saisi sur un OR ou un devis y est ajouté automatiquement — rien à faire de plus.</p>
+      <ol>
+        <li>Consultez, complétez ou supprimez une fiche existante.</li>
+        <li>Vous pouvez aussi ajouter un client directement ici, en <strong>Particulier</strong> ou <strong>Entreprise</strong>.</li>
+      </ol>
+      <div class="callout">Au prochain passage de ce client, taper son nom sur l'OR ou le devis rappelle seul son adresse, téléphone et email.</div>
+    </div>
+  </section>
+
+  <section class="step" id="etape-6">
+    <div class="step-num">06</div>
+    <div>
+      <h2>Planifier un rendez-vous</h2>
+      <div class="sub">Planning RDV</div>
+      <p>Depuis un devis, <kbd>📅 Planifier RDV</kbd> ouvre le planning avec le véhicule pré-rempli.</p>
+      <ol>
+        <li>Choisissez un mécanicien, une date, une heure et une durée.</li>
+        <li>Le calendrier de la semaine affiche les créneaux déjà pris.</li>
+        <li>Validez avec <kbd>✅ Confirmer le RDV</kbd>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="checklist-section">
+    <h2>Fiche de test</h2>
+    <p class="sub">Cochez au fur et à mesure — un cas réel complet, du premier accueil à l'encaissement.</p>
+    <div class="checklist" id="checklist">
+      <div class="check-row"><input type="checkbox" id="c1"><label for="c1"><span class="check-code">00</span>Logo, tampon et coordonnées du garage enregistrés</label></div>
+      <div class="check-row"><input type="checkbox" id="c2"><label for="c2"><span class="check-code">01</span>Un ordre de réparation créé avec un dommage dessiné et les deux signatures</label></div>
+      <div class="check-row"><input type="checkbox" id="c3"><label for="c3"><span class="check-code">02</span>Passage à un devis, lignes de main-d'œuvre et pièces ajoutées</label></div>
+      <div class="check-row"><input type="checkbox" id="c4"><label for="c4"><span class="check-code">03</span>Facture émise (signature ou validation manuelle) et PDF vérifié</label></div>
+      <div class="check-row"><input type="checkbox" id="c5"><label for="c5"><span class="check-code">04</span>Paiement enregistré et statut passé à Payé dans Recettes</label></div>
+      <div class="check-row"><input type="checkbox" id="c6"><label for="c6"><span class="check-code">05</span>Le même client retapé sur un nouvel OR se remplit tout seul</label></div>
+      <div class="check-row"><input type="checkbox" id="c7"><label for="c7"><span class="check-code">06</span>Un rendez-vous planifié et visible dans le calendrier de la semaine</label></div>
+    </div>
+  </section>
+
+  <div class="warnbox">
+    <h3>À savoir avant de généraliser l'usage</h3>
+    <ul>
+      <li>Toutes les données (clients, factures, recettes) restent enregistrées <strong>dans ce navigateur, sur cet ordinateur</strong> — rien n'est partagé automatiquement avec un autre poste.</li>
+      <li>Ne videz jamais le cache / les données de navigation sur ce poste : cela effacerait définitivement l'historique.</li>
+      <li>Un même poste doit rester dédié à l'application pour garder un historique cohérent.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>Clinique Auto Boudia</span>
+    <span>Notice v1 — mecapulse-garage.onrender.com</span>
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb=>{
+  try{
+    const saved = localStorage.getItem('notice_'+cb.id);
+    if(saved==='1'){ cb.checked=true; cb.closest('.check-row').classList.add('done'); }
+  }catch(e){}
+  cb.addEventListener('change', ()=>{
+    cb.closest('.check-row').classList.toggle('done', cb.checked);
+    try{ localStorage.setItem('notice_'+cb.id, cb.checked?'1':'0'); }catch(e){}
+  });
+});
+</script>

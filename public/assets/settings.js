@@ -31,6 +31,12 @@ function mpgSaveSettings(partial){
   return s;
 }
 
+// Met à jour le titre de l'onglet du navigateur avec le nom réel du garage
+function mpgSetPageTitle(pageLabel){
+  const s = mpgGetSettings();
+  document.title = pageLabel + ' — ' + (s.nom || 'MecaPulse Garage');
+}
+
 // Applique les paramètres enregistrés sur les éléments marqués data-mpg="cle"
 function mpgApplySettings(){
   const s = mpgGetSettings();

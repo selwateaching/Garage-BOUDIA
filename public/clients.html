@@ -152,6 +152,7 @@ function renderList(){
 }
 function escHtml(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
+mpgSetPageTitle('Clients');
 renderList();
 </script>
 </body>
