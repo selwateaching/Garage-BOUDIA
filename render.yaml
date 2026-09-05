@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mecapulse-garage
+    runtime: static
+    staticPublishPath: public
+    buildCommand: ""
+    routes:
+      - type: rewrite
+        source: /
+        destination: /index.html
