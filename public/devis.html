@@ -630,20 +630,30 @@ async function genPDF(docLabel, docNumero){
   let y=14;
 
   // EN-TÊTE — juste texte, pas de fond noir
+  let txX=mg;
   if(_s.logo){
     try{
       const fmtM=_s.logo.match(/^data:image\/(\w+);/);
       const imgFmt=fmtM?fmtM[1].toUpperCase().replace('JPG','JPEG'):'PNG';
-      doc.addImage(_s.logo,imgFmt,mg,y-4,14,14);
+      const maxW=16,maxH=14;
+      let dw=maxW,dh=maxH;
+      try{
+        const props=doc.getImageProperties(_s.logo);
+        const ratio=props.width/props.height;
+        if(ratio>=1){ dw=maxW; dh=maxW/ratio; if(dh>maxH){dh=maxH;dw=maxH*ratio;} }
+        else{ dh=maxH; dw=maxH*ratio; if(dw>maxW){dw=maxW;dh=maxW/ratio;} }
+      }catch(e){}
+      doc.addImage(_s.logo,imgFmt,mg,y-4,dw,dh);
+      txX=mg+maxW+4;
     }catch(e){}
   }
-  tx(GARAGE.nom||'Garage',_s.logo?mg+18:mg,y,13,BK,'bold');
+  tx(GARAGE.nom||'Garage',txX,y,13,BK,'bold');
   tx(docLabel,W-mg,y,16,RD,'bold','right');
   y+=5;
-  tx([GARAGE.adresse,GARAGE.ville].filter(Boolean).join(' — '),mg,y,7,GR);
+  tx([GARAGE.adresse,GARAGE.ville].filter(Boolean).join(' — '),txX,y,7,GR);
   tx(numAffiche,W-mg,y,9,BK,'bold','right');
   y+=4;
-  tx([GARAGE.tel,GARAGE.email,GARAGE.nif?('NIF: '+GARAGE.nif):''].filter(Boolean).join(' | '),mg,y,6.5,GR);
+  tx([GARAGE.tel,GARAGE.email,GARAGE.nif?('NIF: '+GARAGE.nif):''].filter(Boolean).join(' | '),txX,y,6.5,GR);
   tx(now.toLocaleDateString('fr-FR'),W-mg,y,7,GR,'normal','right');
   y+=4;
   tx((docLabel==='FACTURE' ? 'Devis d\'origine: '+d.numero : 'OR associé: '+d.orNum) + ' | Valable 30 jours',mg,y,6.5,GR,'italic');

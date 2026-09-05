@@ -523,10 +523,30 @@ async function telechargerPDF(){
     function sig2url(id){const c=document.getElementById(id);if(!c)return null;const tmp=document.createElement('canvas');tmp.width=c.width;tmp.height=c.height;const ctx=tmp.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,tmp.width,tmp.height);ctx.drawImage(c,0,0);return tmp.toDataURL('image/png');}
     const[iD,iF,iG,iDr]=await Promise.all([diag2url('Dessus','cvDessus'),diag2url('Face','cvFace'),diag2url('Gauche','cvGauche'),diag2url('Droit','cvDroit')]);
     const sC=sig2url('sigClient'),sG=sig2url('sigGarage');
-    async function logo2url(){const im=document.querySelector('.logo-zone img');if(!im||!im.src)return null;return new Promise(r2=>{const c=document.createElement('canvas');c.width=80;c.height=80;const tmp=new Image();tmp.onload=()=>{c.getContext('2d').drawImage(tmp,0,0,80,80);r2(c.toDataURL('image/png'));};tmp.onerror=()=>r2(null);tmp.src=im.src;});}
-    const logo=await logo2url();
+    async function logo2url(){
+      const im=document.querySelector('.logo-zone img');if(!im||!im.src)return null;
+      return new Promise(r2=>{
+        const tmp=new Image();
+        tmp.onload=()=>{
+          const ratio=(tmp.naturalWidth||1)/(tmp.naturalHeight||1),maxDim=160;
+          let w=maxDim,h=maxDim;
+          if(ratio>=1){ h=maxDim/ratio; } else { w=maxDim*ratio; }
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          c.getContext('2d').drawImage(tmp,0,0,w,h);
+          r2({url:c.toDataURL('image/png'),ratio});
+        };
+        tmp.onerror=()=>r2(null);
+        tmp.src=im.src;
+      });
+    }
+    const logoData=await logo2url();
     pdf.setFillColor(255,255,255);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.4);pdf.rect(ML,y,CW,16,'FD');
-    if(logo)pdf.addImage(logo,'PNG',ML+2,y+1,14,14);
+    if(logoData){
+      const maxW=14,maxH=14;let dw=maxW,dh=maxH;
+      if(logoData.ratio>=1){ dw=maxW; dh=maxW/logoData.ratio; if(dh>maxH){dh=maxH;dw=maxH*logoData.ratio;} }
+      else{ dh=maxH; dw=maxH*logoData.ratio; if(dw>maxW){dw=maxW;dh=maxW/logoData.ratio;} }
+      pdf.addImage(logoData.url,'PNG',ML+2,y+1,dw,dh);
+    }
     pdf.setFont('helvetica','bold');pdf.setFontSize(16);pdf.setTextColor(20,20,20);pdf.text('ORDRE DE RÉPARATION',ML+19,y+10);
     pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');pdf.setTextColor(60,60,60);pdf.text(g('nomGarage')||'Garage',PW-MR,y+4,{align:'right'});
     pdf.setFont('helvetica','normal');pdf.text(g('adresseGarage')||'',PW-MR,y+8,{align:'right'});pdf.text('Tél : '+(g('telGarage')||''),PW-MR,y+12,{align:'right'});y+=19;
