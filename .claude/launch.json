@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mcpulse-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "C:\\Users\\selwa\\Desktop\\mcpulse-ia\\public"],
+      "port": 5500
+    }
+  ]
+}

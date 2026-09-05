@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devis – MecaPulse Garage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/settings.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+:root{--rouge:#cc2222;--rouge2:#aa1a1a;--bord:#cccccc;--bord-light:#e8e8e8;--bg:#f4f4f4;--text:#222;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-serif;background:var(--bg);padding:20px;box-sizing:border-box;}
+.wrap{max-width:900px;margin:0 auto;width:100%;box-sizing:border-box;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;width:100%;box-sizing:border-box;}
+.topbar h1{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;color:#111;}
+.topbar h1 span{color:var(--rouge);}
+
+/* CARD */
+.card{background:#fff;border:1px solid var(--bord);border-radius:3px;margin-bottom:12px;box-sizing:border-box;overflow:hidden;}
+
+/* EN-TÊTE */
+.entete{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:18px 20px 18px 20px;border-bottom:2px solid #111;align-items:start;}
+.garage-nom{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#111;}
+.garage-nom span{color:var(--rouge);}
+.garage-info{font-size:.74rem;color:#555;line-height:1.9;margin-top:4px;}
+.titre-centre{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.titre-centre .big{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:6px;color:#111;}
+.titre-centre .num{font-size:.85rem;font-weight:700;color:var(--rouge);margin-top:3px;}
+.titre-centre .dat{font-size:.72rem;color:#888;margin-top:2px;}
+.titre-droite{text-align:right;font-size:.75rem;color:#555;line-height:2;padding-right:16px;}
+.ref-line{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-bottom:2px;}
+.ref-line strong{color:#333;white-space:nowrap;font-size:.72rem;}
+.ref-line input{border:none;border-bottom:1px solid #ccc;font-size:.75rem;font-family:'DM Sans',sans-serif;color:#222;text-align:right;outline:none;width:110px;padding:1px 3px;background:transparent;}
+.ref-line input:focus{border-bottom-color:var(--rouge);}
+.titre-droite strong{color:#111;}
+.validite{display:inline-block;border:1px solid #111;font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:2px;padding:4px 10px;margin-top:8px;color:#111;}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:2px;color:#111;padding:5px 16px;border-bottom:1px solid var(--bord);border-top:1px solid var(--bord);background:#f9f9f9;}
+.sec-body{padding:12px 16px;}
+
+/* GRILLES */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.fg{display:flex;flex-direction:column;gap:2px;}
+.fg label{font-size:.58rem;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.5px;}
+.fg input,.fg select,.fg textarea{border:1px solid var(--bord);border-radius:2px;padding:5px 7px;font-size:.8rem;font-family:'DM Sans',sans-serif;color:#222;background:#fff;outline:none;height:28px;transition:border-color .15s;}
+.fg input:focus,.fg select:focus{border-color:var(--rouge);}
+.fg textarea{height:auto;min-height:48px;resize:vertical;}
+
+/* TABLES LIGNES */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem;}
+.tbl thead th{border-bottom:1px solid #111;padding:5px 6px;text-align:left;font-size:.65rem;font-weight:700;letter-spacing:.5px;color:#111;background:#fff;}
+.tbl tbody tr{border-bottom:1px solid var(--bord-light);}
+.tbl tbody td{padding:3px 5px;vertical-align:middle;}
+.tbl tfoot td{border-top:1px solid var(--bord);padding:5px 6px;font-size:.78rem;color:#555;font-style:italic;}
+.tbl tbody input,.tbl tbody select{border:1px solid var(--bord-light);border-radius:2px;padding:3px 5px;font-size:.78rem;width:100%;font-family:'DM Sans',sans-serif;height:26px;background:#fff;}
+.tbl tbody input:focus{outline:none;border-color:var(--rouge);}
+.total-cell{font-weight:700;color:#111;text-align:right;white-space:nowrap;}
+.btn-add{background:none;border:1px dashed var(--bord);border-radius:3px;padding:5px 12px;font-size:.72rem;color:#999;cursor:pointer;margin-top:6px;font-family:'DM Sans',sans-serif;}
+.btn-add:hover{border-color:var(--rouge);color:var(--rouge);}
+.btn-x{background:none;border:none;color:var(--bord);cursor:pointer;font-size:.9rem;padding:0 3px;}
+.btn-x:hover{color:var(--rouge);}
+
+/* TOTAUX */
+.totaux-zone{display:grid;grid-template-columns:1fr 260px;gap:16px;padding:12px 16px;}
+.conditions{font-size:.7rem;color:#777;line-height:1.7;}
+.conditions strong{color:#333;font-size:.72rem;}
+.totaux-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.totaux-tbl td{padding:4px 6px;}
+.totaux-tbl td:last-child{text-align:right;font-weight:600;}
+.totaux-tbl .sep td{border-top:1px solid var(--bord);}
+.totaux-tbl .row-ttc td{border-top:2px solid #111;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;padding-top:7px;color:#111;}
+.taux-sel{border:1px solid var(--bord);border-radius:2px;padding:2px 5px;font-size:.75rem;font-family:'DM Sans',sans-serif;}
+
+/* MENTIONS */
+.mentions{padding:10px 16px;font-size:.68rem;color:#888;line-height:1.6;border-top:1px solid var(--bord-light);}
+
+/* SIGNATURES */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:12px 16px;}
+.sig-box{display:flex;flex-direction:column;gap:4px;}
+.sig-lbl{font-size:.62rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;}
+.sig-mention{font-size:.6rem;color:#aaa;font-style:italic;}
+.sig-canvas{border:1px dashed var(--bord);border-radius:2px;background:#fff;display:block;width:100%;height:100px;touch-action:none;cursor:crosshair;}
+.sig-clear{background:none;border:1px solid var(--bord-light);border-radius:2px;padding:2px 8px;font-size:.65rem;color:#aaa;cursor:pointer;font-family:'DM Sans',sans-serif;align-self:flex-start;margin-top:2px;}
+.sig-clear:hover{border-color:var(--rouge);color:var(--rouge);}
+
+/* BOUTONS BAS */
+.btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;padding-bottom:24px;}
+.btn{border:none;padding:10px 26px;font-family:'Bebas Neue',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.btn-pdf{background:var(--rouge);color:#fff;}
+.btn-pdf:hover{background:var(--rouge2);}
+.btn-send{background:#111;color:#fff;}
+.btn-send:hover{background:#333;}
+.btn-plan{background:#1d6fa4;color:#fff;}
+.btn-plan:hover{background:#155a84;}
+.btn-reset{background:#e5e7eb;color:#374151;}
+.btn-reset:hover{background:#d1d5db;}
+.btn-print{background:#374151;color:#fff;}
+.btn-print:hover{background:#1f2937;}
+
+/* MODAL PLANNING */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:6px;width:100%;max-width:480px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal h2{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:#111;margin-bottom:16px;}
+.modal h2 span{color:var(--rouge);}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.modal-fg{display:flex;flex-direction:column;gap:3px;}
+.modal-fg label{font-size:.6rem;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.5px;}
+.modal-fg input,.modal-fg select,.modal-fg textarea{border:1px solid var(--bord);border-radius:3px;padding:7px 9px;font-size:.82rem;font-family:'DM Sans',sans-serif;color:#222;outline:none;height:32px;}
+.modal-fg input:focus,.modal-fg select:focus{border-color:var(--rouge);}
+.modal-fg.full{grid-column:1/-1;}
+.modal-fg textarea{height:60px;resize:vertical;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+.btn-modal-ok{background:var(--rouge);color:#fff;border:none;padding:9px 22px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;border-radius:3px;cursor:pointer;}
+.btn-modal-ok:hover{background:var(--rouge2);}
+.btn-modal-cancel{background:#e5e7eb;color:#374151;border:none;padding:9px 16px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;border-radius:3px;cursor:pointer;}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;padding:10px 18px;border-radius:4px;font-size:.8rem;display:none;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:99999;border-left:3px solid var(--rouge);}
+
+@media(max-width:700px){
+  .entete{grid-template-columns:1fr;text-align:center;}
+  .titre-droite{text-align:center;}
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr;}
+  .totaux-zone{grid-template-columns:1fr;}
+  .sig-grid{grid-template-columns:1fr;}
+  .modal-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>DEVIS <span>AUTO</span></h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="parametres.html" style="font-size:.75rem;color:#555;text-decoration:none;">⚙ Paramètres</a>
+      <button class="btn btn-reset" style="padding:7px 16px;font-size:.8rem;" onclick="resetDevis()">↺ Nouveau</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- EN-TÊTE -->
+    <div class="entete">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <img id="gn-logo" src="" alt="" style="width:44px;height:44px;object-fit:contain;display:none;flex-shrink:0;">
+        <div>
+          <div class="garage-nom" id="gn-nom">MECAPULSE<span> GARAGE</span></div>
+          <div class="garage-info" id="gn-info">
+            —
+          </div>
+        </div>
+      </div>
+      <div class="titre-centre">
+        <div class="big">DEVIS</div>
+        <div class="num">N° <span id="dnum">D-001</span></div>
+        <div class="dat" id="ddate"></div>
+      </div>
+      <div class="titre-droite">
+        <div class="ref-line"><strong>OR :</strong> <input id="ref-or" placeholder="OR-00001"></div>
+        <div class="ref-line"><strong>Réception :</strong> <input id="ref-recep" type="date"></div>
+        <div class="ref-line"><strong>Conseiller :</strong> <input id="ref-cons" placeholder="Nom"></div>
+        <div class="validite">VALABLE 30 JOURS</div>
+      </div>
+    </div>
+
+    <!-- CLIENT -->
+    <div class="sec-title">CLIENT</div>
+    <div class="sec-body">
+      <div class="g2">
+        <div class="fg"><label>Nom complet</label><input id="c-nom" placeholder="Nom du client"></div>
+        <div class="fg"><label>Adresse</label><input id="c-adr" placeholder="Adresse"></div>
+        <div class="fg"><label>Téléphone</label><input id="c-tel" type="tel" placeholder="Téléphone"></div>
+        <div class="fg"><label>Email</label><input id="c-email" type="email" placeholder="Email"></div>
+      </div>
+    </div>
+
+    <!-- VÉHICULE -->
+    <div class="sec-title">VÉHICULE</div>
+    <div class="sec-body">
+      <div class="g4" style="margin-bottom:8px;">
+        <div class="fg"><label>Immatriculation</label><input id="v-immat" placeholder="AA-000-AA"></div>
+        <div class="fg"><label>Marque / Modèle</label><input id="v-marque" placeholder="Marque Modèle"></div>
+        <div class="fg"><label>Année</label><input id="v-annee" placeholder="2020"></div>
+        <div class="fg"><label>Kilométrage</label><input id="v-km" placeholder="00000 km"></div>
+      </div>
+      <div class="g3">
+        <div class="fg"><label>VIN</label><input id="v-vin" placeholder="VIN"></div>
+        <div class="fg"><label>Code moteur</label><input id="v-moteur" placeholder="Code moteur"></div>
+        <div class="fg"><label>Énergie</label>
+          <select id="v-energie"><option>Diesel</option><option>Essence</option><option>Hybride</option><option>Électrique</option><option>GPL</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN-D'ŒUVRE -->
+    <div class="sec-title">MAIN-D'ŒUVRE</div>
+    <div class="sec-body" style="padding-bottom:6px;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:44%">Opération</th>
+          <th style="width:13%">Temps (h)</th>
+          <th style="width:17%">Tarif HT/h</th>
+          <th style="width:17%">Total HT</th>
+          <th style="width:9%"></th>
+        </tr></thead>
+        <tbody id="mo-body"></tbody>
+        <tfoot><tr>
+          <td colspan="3" style="text-align:right;">Sous-total MO HT</td>
+          <td class="total-cell" id="mo-sub">0,00 DA</td><td></td>
+        </tr></tfoot>
+      </table>
+      <button class="btn-add" onclick="addLine('mo')">+ Opération</button>
+    </div>
+
+    <!-- PIÈCES -->
+    <div class="sec-title">PIÈCES</div>
+    <div class="sec-body" style="padding-bottom:6px;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:17%">Référence</th>
+          <th style="width:35%">Désignation</th>
+          <th style="width:9%">Qté</th>
+          <th style="width:17%">PU HT</th>
+          <th style="width:13%">Total HT</th>
+          <th style="width:9%"></th>
+        </tr></thead>
+        <tbody id="piece-body"></tbody>
+        <tfoot><tr>
+          <td colspan="4" style="text-align:right;">Sous-total Pièces HT</td>
+          <td class="total-cell" id="piece-sub">0,00 DA</td><td></td>
+        </tr></tfoot>
+      </table>
+      <button class="btn-add" onclick="addLine('piece')">+ Pièce</button>
+    </div>
+
+    <!-- SOUS-TRAITANCE -->
+    <div class="sec-title">SOUS-TRAITANCE <span style="font-size:.6rem;opacity:.5;letter-spacing:0;">(optionnel)</span></div>
+    <div class="sec-body" style="padding-bottom:6px;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:75%">Désignation</th>
+          <th style="width:16%">Montant HT</th>
+          <th style="width:9%"></th>
+        </tr></thead>
+        <tbody id="st-body"></tbody>
+        <tfoot><tr>
+          <td style="text-align:right;">Sous-total ST HT</td>
+          <td class="total-cell" id="st-sub">0,00 DA</td><td></td>
+        </tr></tfoot>
+      </table>
+      <button class="btn-add" onclick="addLine('st')">+ Sous-traitance</button>
+    </div>
+
+    <!-- TOTAUX -->
+    <div class="totaux-zone">
+      <div class="conditions">
+        <strong>Conditions</strong><br>
+        Validité 30 jours. Travaux effectués après accord signé.<br>
+        Pièces restituables sur demande.<br>
+        Paiement comptant à la livraison.<br><br>
+        <strong>Garantie</strong><br>
+        Pièces : garantie constructeur<br>
+        Main-d'œuvre : 3 mois / 5 000 km
+      </div>
+      <table class="totaux-tbl">
+        <tr><td>Total MO HT</td><td id="t-mo">0,00 DA</td></tr>
+        <tr><td>Total Pièces HT</td><td id="t-piec">0,00 DA</td></tr>
+        <tr><td>Total ST HT</td><td id="t-st">0,00 DA</td></tr>
+        <tr class="sep"><td><strong>Total HT</strong></td><td id="t-ht"><strong>0,00 DA</strong></td></tr>
+        <tr>
+          <td>TVA
+            <select class="taux-sel" id="tva-sel" onchange="calc()">
+              <option value="19" selected>19%</option><option value="9">9%</option>
+              <option value="0">0%</option>
+            </select>
+          </td>
+          <td id="t-tva">0,00 DA</td>
+        </tr>
+        <tr class="row-ttc"><td>TOTAL TTC</td><td id="t-ttc">0,00 DA</td></tr>
+      </table>
+    </div>
+
+    <!-- MENTIONS -->
+    <div class="mentions" id="mentions-legal">
+      Devis valable 30 jours à compter de sa date d'émission.
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="sec-title">SIGNATURES</div>
+    <div class="sig-grid">
+      <div class="sig-box">
+        <div class="sig-lbl">Signature du client</div>
+        <div class="sig-mention">Précédée de « Bon pour accord »</div>
+        <canvas id="sig-client" class="sig-canvas"></canvas>
+        <button class="sig-clear" onclick="clearSig('sig-client')">✕ Effacer</button>
+      </div>
+      <div class="sig-box">
+        <div class="sig-lbl">Signature du garage</div>
+        <div class="sig-mention">Cachet et signature</div>
+        <canvas id="sig-garage" class="sig-canvas"></canvas>
+        <button class="sig-clear" onclick="clearSig('sig-garage')">✕ Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOUTONS -->
+  <div class="btns">
+    <button class="btn btn-pdf" onclick="genPDF()">⬇ Télécharger PDF</button>
+    <button class="btn btn-send" onclick="sendGmail()">✉ Envoyer au client</button>
+    <button class="btn btn-plan" onclick="openPlanning()">📅 Planifier RDV</button>
+    <button class="btn btn-print" onclick="window.print()">🖨 Imprimer</button>
+    <button class="btn btn-reset" onclick="resetDevis()">↺ Nouveau devis</button>
+  </div>
+</div>
+
+<!-- MODAL PLANNING -->
+<div class="modal-bg" id="modal-plan">
+  <div class="modal">
+    <h2>PLANIFIER <span>RDV</span></h2>
+    <div class="modal-grid">
+      <div class="modal-fg"><label>Client</label><input id="p-client" placeholder="Nom client"></div>
+      <div class="modal-fg"><label>Téléphone</label><input id="p-tel" type="tel" placeholder="Téléphone"></div>
+      <div class="modal-fg"><label>Véhicule</label><input id="p-veh" placeholder="Immat. / Modèle"></div>
+      <div class="modal-fg"><label>N° Devis</label><input id="p-devis" placeholder="D-001" readonly style="background:#f5f5f5;"></div>
+      <div class="modal-fg"><label>Date du RDV</label><input id="p-date" type="date"></div>
+      <div class="modal-fg"><label>Heure</label><input id="p-heure" type="time" value="08:00"></div>
+      <div class="modal-fg"><label>Durée estimée</label>
+        <select id="p-duree">
+          <option value="0.5">30 min</option><option value="1">1 heure</option>
+          <option value="1.5">1h30</option><option value="2" selected>2 heures</option>
+          <option value="3">3 heures</option><option value="4">4 heures</option>
+          <option value="8">Journée</option>
+        </select>
+      </div>
+      <div class="modal-fg"><label>Technicien</label>
+        <select id="p-tech">
+          <option>— Sélectionner —</option>
+          <option>Technicien 1</option><option>Technicien 2</option><option>Technicien 3</option>
+        </select>
+      </div>
+      <div class="modal-fg full"><label>Notes / Travaux à prévoir</label>
+        <textarea id="p-notes" placeholder="Résumé des travaux..."></textarea>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="closePlanning()">Annuler</button>
+      <button class="btn-modal-ok" onclick="savePlanning()">✅ Enregistrer RDV</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const _s=mpgGetSettings();
+const GARAGE={
+  nom:_s.nom,adresse:_s.adresse,ville:_s.ville||'',
+  tel:_s.tel,email:_s.email,
+  nif:_s.nif,rc:_s.rc,ai:_s.ai
+};
+document.getElementById('gn-nom').innerHTML=(GARAGE.nom||'Mon Garage').toUpperCase();
+mpgApplyLogo('gn-logo');
+document.getElementById('gn-info').innerHTML=[
+  [GARAGE.adresse,GARAGE.ville].filter(Boolean).join(' — '),
+  [GARAGE.tel,GARAGE.email].filter(Boolean).join(' | '),
+  [GARAGE.nif?('NIF : '+GARAGE.nif):'',GARAGE.rc?('RC : '+GARAGE.rc):''].filter(Boolean).join(' | ')
+].filter(Boolean).join('<br>');
+
+// NUMÉRO AUTO
+function nextNum(){
+  let n=parseInt(localStorage.getItem('devis_n')||'0')+1;
+  localStorage.setItem('devis_n',n);
+  return 'D-'+String(n).padStart(3,'0');
+}
+
+let devisNum='';
+let moC=0,piC=0,stC=0;
+
+function initDevis(or){
+  devisNum=nextNum();
+  document.getElementById('dnum').textContent=devisNum;
+  const now=new Date();
+  document.getElementById('ddate').textContent='Émis le '+now.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  if(or){
+    sv('c-nom',or.clientNom||'');sv('c-adr',or.clientAdresse||'');
+    sv('c-tel',or.clientTel||'');sv('c-email',or.clientEmail||'');
+    sv('v-immat',or.immat||'');sv('v-marque',or.marque||'');
+    sv('v-annee',or.annee||'');sv('v-km',or.km||'');
+    sv('v-vin',or.vin||'');sv('v-moteur',or.moteur||'');
+    document.getElementById('ref-or').value=or.orNum||'';
+    document.getElementById('ref-recep').value=or.dateRecep||'';
+    document.getElementById('ref-cons').value=or.conseiller||'';
+    if(or.reparations)addLine('mo',or.reparations);else addLine('mo');
+  }else{addLine('mo');}
+  addLine('piece');
+  initSigs();
+}
+
+// LIGNES
+function addLine(type,desc=''){
+  if(type==='mo'){
+    const id=++moC;
+    const tr=document.createElement('tr');tr.id='mo-'+id;
+    tr.innerHTML=`<td><input placeholder="Opération..." value="${esc(desc)}" oninput="calc()"></td>
+      <td><input type="number" min="0" step="0.1" placeholder="0.0" oninput="calc()" style="text-align:right;"></td>
+      <td><input type="number" min="0" step="0.01" placeholder="70.00" value="70" oninput="calc()" style="text-align:right;"></td>
+      <td class="total-cell" id="mot-${id}">0,00 DA</td>
+      <td><button class="btn-x" onclick="del('mo-${id}')">✕</button></td>`;
+    document.getElementById('mo-body').appendChild(tr);
+  }else if(type==='piece'){
+    const id=++piC;
+    const tr=document.createElement('tr');tr.id='pi-'+id;
+    tr.innerHTML=`<td><input placeholder="Réf." oninput="calc()"></td>
+      <td><input placeholder="Désignation..." oninput="calc()"></td>
+      <td><input type="number" min="0" step="1" value="1" oninput="calc()" style="text-align:right;width:46px;"></td>
+      <td><input type="number" min="0" step="0.01" placeholder="0.00" oninput="calc()" style="text-align:right;"></td>
+      <td class="total-cell" id="pit-${id}">0,00 DA</td>
+      <td><button class="btn-x" onclick="del('pi-${id}')">✕</button></td>`;
+    document.getElementById('piece-body').appendChild(tr);
+  }else if(type==='st'){
+    const id=++stC;
+    const tr=document.createElement('tr');tr.id='st-'+id;
+    tr.innerHTML=`<td><input placeholder="Désignation..." oninput="calc()" style="width:100%;"></td>
+      <td><input type="number" min="0" step="0.01" placeholder="0.00" oninput="calc()" style="text-align:right;"></td>
+      <td><button class="btn-x" onclick="del('st-${id}')">✕</button></td>`;
+    document.getElementById('st-body').appendChild(tr);
+  }
+  calc();
+}
+
+function del(id){const r=document.getElementById(id);if(r)r.remove();calc();}
+function esc(s){return String(s).replace(/"/g,'&quot;');}
+
+// CALCUL
+function fmt(n){return n.toFixed(2).replace('.',',')+' DA';}
+function num(s){return parseFloat(String(s).replace(',','.'))||0;}
+
+function calc(){
+  let mo=0,pi=0,st=0;
+  document.querySelectorAll('#mo-body tr').forEach(tr=>{
+    const ns=tr.querySelectorAll('input[type=number]');if(ns.length<2)return;
+    const t=num(ns[0].value)*num(ns[1].value);mo+=t;
+    const el=document.getElementById('mot-'+tr.id.split('-')[1]);if(el)el.textContent=fmt(t);
+  });
+  document.querySelectorAll('#piece-body tr').forEach(tr=>{
+    const ns=tr.querySelectorAll('input[type=number]');if(ns.length<2)return;
+    const t=num(ns[0].value)*num(ns[1].value);pi+=t;
+    const el=document.getElementById('pit-'+tr.id.split('-')[1]);if(el)el.textContent=fmt(t);
+  });
+  document.querySelectorAll('#st-body tr').forEach(tr=>{
+    const ns=tr.querySelectorAll('input[type=number]');if(!ns.length)return;
+    st+=num(ns[0].value);
+  });
+  const ht=mo+pi+st,taux=parseFloat(document.getElementById('tva-sel').value)/100;
+  const tva=ht*taux,ttc=ht+tva;
+  document.getElementById('mo-sub').textContent=fmt(mo);
+  document.getElementById('piece-sub').textContent=fmt(pi);
+  document.getElementById('st-sub').textContent=fmt(st);
+  document.getElementById('t-mo').textContent=fmt(mo);
+  document.getElementById('t-piec').textContent=fmt(pi);
+  document.getElementById('t-st').textContent=fmt(st);
+  document.getElementById('t-ht').innerHTML='<strong>'+fmt(ht)+'</strong>';
+  document.getElementById('t-tva').textContent=fmt(tva);
+  document.getElementById('t-ttc').textContent=fmt(ttc);
+}
+
+// SIGNATURES
+function initSigs(){initSig('sig-client');initSig('sig-garage');}
+function initSig(id){
+  const c=document.getElementById(id),ctx=c.getContext('2d');
+  function resize(){const dpr=window.devicePixelRatio||1,r=c.getBoundingClientRect();
+    c.width=(r.width||380)*dpr;c.height=(r.height||100)*dpr;
+    ctx.scale(dpr,dpr);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.8;ctx.lineCap='round';ctx.lineJoin='round';}
+  resize();window.addEventListener('resize',resize);
+  let dr=false,lx=0,ly=0;
+  const gp=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top];};
+  c.addEventListener('mousedown',e=>{e.preventDefault();dr=true;[lx,ly]=gp(e);});
+  c.addEventListener('mousemove',e=>{e.preventDefault();if(!dr)return;const[x,y]=gp(e);ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();[lx,ly]=[x,y];});
+  c.addEventListener('mouseup',e=>{e.preventDefault();dr=false;});
+  c.addEventListener('mouseleave',e=>{e.preventDefault();dr=false;});
+  c.addEventListener('touchstart',e=>{e.preventDefault();dr=true;[lx,ly]=gp(e);},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!dr)return;const[x,y]=gp(e);ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();[lx,ly]=[x,y];},{passive:false});
+  c.addEventListener('touchend',e=>{e.preventDefault();dr=false;},{passive:false});
+}
+function clearSig(id){const c=document.getElementById(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+const blank=c=>!Array.from(c.getContext('2d').getImageData(0,0,c.width,c.height).data).some(x=>x!==0);
+
+// HELPERS
+function sv(id,v){const e=document.getElementById(id);if(e)e.value=v;}
+function gv(id){const e=document.getElementById(id);return e?e.value:'';}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+
+function resetDevis(){
+  if(!confirm('Nouveau devis ? (données actuelles perdues)'))return;
+  ['mo-body','piece-body','st-body'].forEach(id=>document.getElementById(id).innerHTML='');
+  moC=0;piC=0;stC=0;
+  ['c-nom','c-adr','c-tel','c-email','v-immat','v-marque','v-annee','v-km','v-vin','v-moteur'].forEach(id=>sv(id,''));
+  clearSig('sig-client');clearSig('sig-garage');
+  initDevis();toast('Nouveau devis créé !');
+}
+
+// COLLECT
+function collect(){
+  const moL=[],piL=[],stL=[];
+  document.querySelectorAll('#mo-body tr').forEach(tr=>{
+    const ins=tr.querySelectorAll('input'),ns=tr.querySelectorAll('input[type=number]');
+    if(!ins.length)return;
+    moL.push({desc:ins[0].value,temps:ns[0]?.value||'',tarif:ns[1]?.value||'',total:tr.querySelector('.total-cell')?.textContent||''});
+  });
+  document.querySelectorAll('#piece-body tr').forEach(tr=>{
+    const ins=tr.querySelectorAll('input');if(ins.length<4)return;
+    piL.push({ref:ins[0].value,designation:ins[1].value,qte:ins[2].value,pu:ins[3].value,total:tr.querySelector('.total-cell')?.textContent||''});
+  });
+  document.querySelectorAll('#st-body tr').forEach(tr=>{
+    const ins=tr.querySelectorAll('input');if(ins.length<2)return;
+    stL.push({designation:ins[0].value,montant:ins[1].value});
+  });
+  return{
+    numero:devisNum,date:document.getElementById('ddate').textContent,
+    orNum:document.getElementById('ref-or').textContent,
+    client:{nom:gv('c-nom'),adr:gv('c-adr'),tel:gv('c-tel'),email:gv('c-email')},
+    vehicule:{immat:gv('v-immat'),marque:gv('v-marque'),annee:gv('v-annee'),km:gv('v-km'),vin:gv('v-vin'),moteur:gv('v-moteur'),energie:gv('v-energie')},
+    moL,piL,stL,
+    ht:document.getElementById('t-ht').textContent.replace(/<[^>]*>/g,''),
+    tva:document.getElementById('t-tva').textContent,
+    ttc:document.getElementById('t-ttc').textContent,
+    tauxTVA:gv('tva-sel')
+  };
+}
+
+// PDF — VERSION ÉCONOMIE D'ENCRE (pas de blocs noirs, juste lignes et texte)
+async function genPDF(){
+  const d=collect();
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+  const W=210,mg=14,cw=W-mg*2;
+  const BK=[0,0,0],RD=[180,20,20],GR=[120,120,120],LG=[240,240,240];
+  const tx=(t,x,y,sz,c,st,al)=>{doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);doc.setTextColor(...(c||BK));doc.text(String(t),x,y,{align:al||'left'});};
+  const ln=(x1,y1,x2,y2,c,w)=>{doc.setDrawColor(...(c||[180,180,180]));doc.setLineWidth(w||0.3);doc.line(x1,y1,x2,y2);};
+  const now=new Date();
+  let y=14;
+
+  // EN-TÊTE — juste texte, pas de fond noir
+  if(_s.logo){
+    try{
+      const fmtM=_s.logo.match(/^data:image\/(\w+);/);
+      const imgFmt=fmtM?fmtM[1].toUpperCase().replace('JPG','JPEG'):'PNG';
+      doc.addImage(_s.logo,imgFmt,mg,y-4,14,14);
+    }catch(e){}
+  }
+  tx(GARAGE.nom||'Garage',_s.logo?mg+18:mg,y,13,BK,'bold');
+  tx('DEVIS',W-mg,y,16,RD,'bold','right');
+  y+=5;
+  tx([GARAGE.adresse,GARAGE.ville].filter(Boolean).join(' — '),mg,y,7,GR);
+  tx(d.numero,W-mg,y,9,BK,'bold','right');
+  y+=4;
+  tx([GARAGE.tel,GARAGE.email,GARAGE.nif?('NIF: '+GARAGE.nif):''].filter(Boolean).join(' | '),mg,y,6.5,GR);
+  tx(now.toLocaleDateString('fr-FR'),W-mg,y,7,GR,'normal','right');
+  y+=4;
+  tx('OR associé: '+d.orNum+' | Valable 30 jours',mg,y,6.5,GR,'italic');
+  y+=5;
+  ln(mg,y,W-mg,y,[0,0,0],0.6);y+=5;
+
+  // CLIENT / VÉHICULE
+  const hw=(cw-6)/2;
+  tx('CLIENT',mg,y+3,7,BK,'bold');
+  tx('VÉHICULE',mg+hw+6,y+3,7,BK,'bold');
+  y+=5;ln(mg,y,mg+hw,y,[0,0,0],0.4);ln(mg+hw+6,y,W-mg,y,[0,0,0],0.4);y+=3;
+  const cl=d.client,ve=d.vehicule;
+  const clL=[cl.nom,cl.adr,cl.tel,cl.email].filter(Boolean);
+  const veL=[(ve.immat?ve.immat+' — ':'')+ve.marque,ve.annee?(ve.annee+(ve.km?' | '+ve.km+' km':'')):ve.km?ve.km+' km':'','VIN: '+ve.vin,'Moteur: '+ve.moteur].filter(l=>l.trim()&&l!='VIN: '&&l!='Moteur: ');
+  const mL=Math.max(clL.length,veL.length);
+  clL.forEach((l,i)=>tx(l,mg,y+i*4,7.5,BK));
+  veL.forEach((l,i)=>tx(l,mg+hw+6,y+i*4,7.5,BK));
+  y+=mL*4+6;ln(mg,y,W-mg,y,[180,180,180],0.3);y+=4;
+
+  // HELPER TABLEAU LÉGER
+  const drawTblHeader=(cols)=>{
+    cols.forEach(([lb,x,w])=>{tx(lb,x,y+3,5.8,BK,'bold');});
+    y+=5;ln(mg,y,W-mg,y,[0,0,0],0.4);y+=1;
+  };
+  const drawTblRow=(cells,shade)=>{
+    if(shade){doc.setFillColor(...LG);doc.rect(mg,y,cw,5,'F');}
+    cells.forEach(([t,x,al])=>tx(String(t),x,y+3.5,7,BK,'normal',al||'left'));
+    y+=5;
+  };
+
+  // MO
+  if(d.moL.length){
+    tx('MAIN-D\'ŒUVRE',mg,y+3,7.5,BK,'bold');y+=5;
+    ln(mg,y,W-mg,y,[0,0,0],0.5);y+=1;
+    drawTblHeader([['OPÉRATION',mg],['TEMPS',mg+cw*0.5],['TARIF/H',mg+cw*0.67],['TOTAL HT',W-mg-1]]);
+    d.moL.forEach((l,i)=>drawTblRow([[l.desc||'—',mg],[( l.temps||'—')+' h',mg+cw*0.5],[( l.tarif||'—')+' DA',mg+cw*0.67],[l.total||'—',W-mg-1,'right']],i%2===1));
+    tx('Sous-total MO HT',W-mg-35,y+3,6.5,GR,'italic');tx(document.getElementById('mo-sub').textContent,W-mg-1,y+3,7,BK,'bold','right');y+=6;
+    ln(mg,y,W-mg,y,[200,200,200],0.3);y+=3;
+  }
+
+  // PIÈCES
+  if(d.piL.length){
+    tx('PIÈCES',mg,y+3,7.5,BK,'bold');y+=5;
+    ln(mg,y,W-mg,y,[0,0,0],0.5);y+=1;
+    drawTblHeader([['RÉF.',mg],['DÉSIGNATION',mg+cw*0.17],['QTÉ',mg+cw*0.57],['PU HT',mg+cw*0.65],['TOTAL HT',W-mg-1]]);
+    d.piL.forEach((l,i)=>drawTblRow([[l.ref||'—',mg],[l.designation||'—',mg+cw*0.17],[l.qte||'1',mg+cw*0.57],[(l.pu||'0')+' DA',mg+cw*0.65],[l.total||'—',W-mg-1,'right']],i%2===1));
+    tx('Sous-total Pièces HT',W-mg-35,y+3,6.5,GR,'italic');tx(document.getElementById('piece-sub').textContent,W-mg-1,y+3,7,BK,'bold','right');y+=6;
+    ln(mg,y,W-mg,y,[200,200,200],0.3);y+=3;
+  }
+
+  // TOTAUX
+  const totX=W-mg-65;
+  [['Total MO HT',document.getElementById('t-mo').textContent],
+   ['Total Pièces HT',document.getElementById('t-piec').textContent],
+   ['Total ST HT',document.getElementById('t-st').textContent],
+   ['Total HT',d.ht],
+   ['TVA '+d.tauxTVA+'%',d.tva]].forEach(([lb,vl])=>{
+    tx(lb,totX,y+3,7,GR);tx(vl,W-mg,y+3,7.5,BK,'bold','right');y+=5;
+  });
+  ln(totX,y,W-mg,y,[0,0,0],0.5);y+=2;
+  tx('TOTAL TTC',totX,y+5,10,BK,'bold');tx(d.ttc,W-mg,y+5,11,RD,'bold','right');y+=10;
+  ln(mg,y,W-mg,y,[200,200,200],0.3);y+=4;
+
+  // MENTIONS
+  const mTxt='Validité 30 jours. Travaux après accord signé. Garantie pièces constructeur, MO 3 mois/5 000 km. Paiement comptant.';
+  const mL2=doc.splitTextToSize(mTxt,cw);
+  doc.setFont('helvetica','italic');doc.setFontSize(6);doc.setTextColor(...GR);doc.text(mL2,mg,y+3);
+  y+=mL2.length*3.5+6;ln(mg,y,W-mg,y,[180,180,180],0.3);y+=4;
+
+  // SIGNATURES
+  tx('Signature du client — Bon pour accord',mg,y+3,7,BK,'bold');
+  tx('Cachet et signature du garage',mg+hw+6,y+3,7,BK,'bold');y+=5;
+  doc.setDrawColor(180,180,180);doc.setLineWidth(0.4);
+  doc.rect(mg,y,hw,26,'S');doc.rect(mg+hw+6,y,hw,26,'S');
+  try{
+    const sc=document.getElementById('sig-client'),sg=document.getElementById('sig-garage');
+    if(!blank(sc))doc.addImage(sc.toDataURL('image/png'),'PNG',mg+1,y+1,hw-2,24);
+    if(!blank(sg))doc.addImage(sg.toDataURL('image/png'),'PNG',mg+hw+7,y+1,hw-2,24);
+  }catch(e){}
+  y+=30;
+  ln(mg,y,W-mg,y,[180,180,180],0.3);
+  tx([GARAGE.nom,GARAGE.rc?('RC: '+GARAGE.rc):'',GARAGE.nif?('NIF: '+GARAGE.nif):''].filter(Boolean).join(' — '),W/2,y+4,5.5,GR,'normal','center');
+
+  const fname='Devis_'+d.numero+'_'+(d.client.nom||'client').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'')+'.pdf';
+  doc.save(fname);toast('📥 PDF téléchargé : '+fname);
+  return{doc,fname};
+}
+
+// ENVOI PAR EMAIL — ouvre Gmail avec le récap ; le PDF téléchargé doit être joint manuellement
+async function sendGmail(){
+  const d=collect();
+  if(!d.client.email||!d.client.email.includes('@')){toast('⚠️ Email client requis');return;}
+  await genPDF();
+  const sujet=`Devis ${d.numero} — ${d.vehicule.immat||''}`;
+  const corps=`Bonjour ${d.client.nom||''},\n\nVeuillez trouver ci-joint le devis ${d.numero} pour votre véhicule ${d.vehicule.marque} (${d.vehicule.immat}).\nTotal TTC : ${d.ttc}\n\nMerci de joindre le PDF téléchargé à cet email.\n\nCordialement,\n${GARAGE.nom||''}`;
+  mpgOpenGmail(d.client.email,sujet,corps);
+  toast('✅ Gmail ouvert — pensez à joindre le PDF téléchargé');
+}
+
+// PLANNING — ouvre la modal pré-remplie
+function openPlanning(){
+  const d=collect();
+  const payload={
+    clientNom   :d.client.nom||'',
+    clientEmail :d.client.email||'',
+    clientTel   :d.client.tel||'',
+    vehicule    :(d.vehicule.marque||'').trim(),
+    immat       :d.vehicule.immat||'',
+    numeroDevis :d.numero||'',
+    orAssocie   :document.getElementById('ref-or')?.value||'',
+    reparations :d.moL.map(l=>l.desc).filter(Boolean).join('\n')||''
+  };
+  localStorage.setItem('devis_to_planning',JSON.stringify(payload));
+  window.location.href='planning.html';
+}
+
+function closePlanning(){document.getElementById('modal-plan').classList.remove('open');}
+
+function savePlanning(){
+  const rdv={
+    client:gv('p-client'),tel:gv('p-tel'),vehicule:gv('p-veh'),
+    devis:gv('p-devis'),date:gv('p-date'),heure:gv('p-heure'),
+    duree:gv('p-duree'),technicien:gv('p-tech'),notes:gv('p-notes'),
+    garage:GARAGE.nom,type:'rdv_reparation'
+  };
+  try{
+    const list=JSON.parse(localStorage.getItem('mpg_rdvs')||'[]');
+    list.push(rdv);
+    localStorage.setItem('mpg_rdvs',JSON.stringify(list.slice(-200)));
+    toast('✅ RDV enregistré !');
+  }catch(e){ toast('❌ Erreur enregistrement','err'); }
+  closePlanning();
+}
+
+// ══ INITIALISATION AU CHARGEMENT ══
+(function init(){
+  // Récupérer données depuis l'OR (localStorage)
+  let or = null;
+  try{
+    const s = localStorage.getItem('or_to_devis');
+    if(s){ or = JSON.parse(s); localStorage.removeItem('or_to_devis'); }
+  }catch(e){}
+
+  initDevis(or);
+
+  // Initialiser les signatures
+  ['sig-client','sig-garage'].forEach(id => initSig(id));
+})();
+
+function initSig(id){
+  const c = document.getElementById(id);
+  if(!c) return;
+  const dpr = window.devicePixelRatio||1;
+  function resize(){
+    const w=c.offsetWidth, h=c.offsetHeight||110;
+    c.width=w*dpr; c.height=h*dpr;
+    const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+    ctx.strokeStyle='#111'; ctx.lineWidth=2; ctx.lineCap='round';
+  }
+  resize();
+  const ctx=c.getContext('2d');
+  let drawing=false;
+  function gp(e){ const r=c.getBoundingClientRect(), s=e.touches?e.touches[0]:e; return[s.clientX-r.left,s.clientY-r.top]; }
+  c.addEventListener('mousedown',e=>{drawing=true;ctx.beginPath();ctx.moveTo(...gp(e));});
+  c.addEventListener('mousemove',e=>{if(!drawing)return;ctx.lineTo(...gp(e));ctx.stroke();});
+  c.addEventListener('mouseup',()=>drawing=false);
+  c.addEventListener('mouseleave',()=>drawing=false);
+  c.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;ctx.beginPath();ctx.moveTo(...gp(e));},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;ctx.lineTo(...gp(e));ctx.stroke();},{passive:false});
+  c.addEventListener('touchend',()=>drawing=false);
+  window.addEventListener('resize',resize);
+}
+
+function clearSig(id){ const c=document.getElementById(id); if(c){ c.getContext('2d').clearRect(0,0,c.width,c.height); } }
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',3500);
+}
+</script>
+</body>
+</html>

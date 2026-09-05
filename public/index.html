@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordre de Réparation — MecaPulseGarage</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/settings.js"></script>
+<style>
+:root{--noir:#0f0f0f;--gris:#1e1e1e;--gris2:#2d2d2d;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#3a3a3a;--rouge:#e53935;--vert:#4caf50;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
+.container{max-width:920px;margin:0 auto;}
+header{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:24px;gap:20px;}
+.logo-zone img{height:64px;object-fit:contain;display:block;}
+.logo-zone p{font-size:0.72rem;color:var(--texte2);text-transform:uppercase;letter-spacing:3px;margin-top:5px;}
+.titre-doc{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;text-align:center;flex:1;line-height:1;}
+.titre-doc span{color:var(--accent);}
+.meta-line{display:flex;gap:24px;align-items:center;background:var(--gris2);padding:10px 16px;border-left:3px solid var(--accent);margin-bottom:22px;flex-wrap:wrap;}
+.meta-item{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--texte2);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+.meta-item input{background:transparent;border:none;border-bottom:1px solid var(--bordure);color:var(--texte);padding:3px 8px;font-family:'Barlow',sans-serif;font-size:0.82rem;outline:none;width:140px;}
+.meta-item input:focus{border-bottom-color:var(--accent);}
+.meta-item input[type="date"]{width:160px;}
+section{margin-bottom:22px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+.grid-gc{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+label{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:500;}
+input[type="text"],input[type="date"],input[type="tel"],input[type="email"],select,textarea{background:var(--gris);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:8px 10px;font-family:'Barlow',sans-serif;font-size:0.88rem;transition:border-color 0.2s,background 0.2s;outline:none;width:100%;border-radius:0;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-bottom-color:var(--accent);background:var(--gris2);}
+input::placeholder,textarea::placeholder{color:#555;}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23a89f8c' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+select option{background:var(--gris);color:var(--texte);}
+textarea{resize:vertical;min-height:90px;}
+.oui-non{display:flex;}
+.oui-non button{padding:6px 14px;border:1px solid var(--bordure);background:transparent;color:var(--texte2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s;}
+.oui-non button:first-child{border-right:none;}
+.oui-non button.active-oui{background:#1a3a1a;border-color:var(--vert);color:var(--vert);}
+.oui-non button.active-non{background:#3a0f0f;border-color:var(--rouge);color:var(--rouge);}
+.reservoir-wrap{display:flex;align-items:center;gap:0;background:var(--gris);border:1px solid var(--bordure);padding:4px 8px;width:fit-content;}
+.reservoir-wrap span{font-size:0.68rem;color:var(--texte2);text-transform:uppercase;letter-spacing:1px;margin-right:8px;white-space:nowrap;}
+.res-btn{min-width:40px;height:28px;border:1px solid var(--bordure);border-right:none;background:transparent;color:var(--texte2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;transition:all 0.15s;padding:0 6px;}
+.res-btn:last-child{border-right:1px solid var(--bordure);}
+.res-btn.active{background:#3a2d00;border-color:var(--accent);color:var(--accent);}
+.etat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.etat-check{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--bordure);background:transparent;color:var(--texte2);cursor:pointer;font-family:'Barlow',sans-serif;font-size:0.82rem;transition:all 0.15s;}
+.etat-check.active-enfoncement{background:#2d1a00;border-color:#ff9800;color:#ff9800;}
+.etat-check.active-rayure{background:#3a2d00;border-color:var(--accent);color:var(--accent);}
+.etat-check.active-casse{background:#3a0f0f;border-color:var(--rouge);color:var(--rouge);}
+.car-diagrams{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.car-diagram-box{background:var(--gris);border:1px solid var(--bordure);padding:5px 6px 4px;}
+.car-diagram-box h5{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--texte2);margin-bottom:3px;text-align:center;}
+.diagram-wrap{position:relative;width:100%;}
+.diagram-svg{width:100%;display:block;}
+.diagram-canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;background:transparent;}
+.canvas-actions{display:flex;gap:6px;margin-top:3px;justify-content:flex-end;align-items:center;}
+.btn-canvas-clear{font-size:0.62rem;color:var(--texte2);background:transparent;border:1px solid var(--bordure);padding:2px 7px;cursor:pointer;font-family:'Barlow',sans-serif;text-transform:uppercase;letter-spacing:1px;}
+.btn-canvas-clear:hover{border-color:var(--rouge);color:var(--rouge);}
+.sig-zone{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.sig-box{background:var(--gris);border:1px solid var(--bordure);padding:14px;}
+.sig-box h4{font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--texte2);margin-bottom:8px;}
+canvas.sig-canvas{width:100%;height:110px;background:#111;cursor:crosshair;display:block;touch-action:none;}
+.sig-actions{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.btn-clear{font-size:0.68rem;color:var(--texte2);background:transparent;border:1px solid var(--bordure);padding:3px 10px;cursor:pointer;font-family:'Barlow',sans-serif;text-transform:uppercase;letter-spacing:1px;}
+.btn-clear:hover{border-color:var(--rouge);color:var(--rouge);}
+.sig-note{font-size:0.68rem;color:var(--texte2);}
+.btn-arabic{background:transparent;color:var(--texte);border:1px solid var(--bordure);padding:12px 22px;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-arabic:hover:not(:disabled){border-color:var(--texte);}
+.btn-arabic:disabled{border-color:#333;color:#555;cursor:not-allowed;}
+.actions{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:20px;border-top:1px solid var(--bordure);flex-wrap:wrap;align-items:center;}
+.btn-secondary{background:transparent;color:var(--texte2);border:1px solid var(--bordure);padding:12px 22px;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--texte);color:var(--texte);}
+.btn-primary{background:var(--accent);color:var(--noir);border:none;padding:12px 22px;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.btn-primary:hover{background:#f5c800;}
+.btn-pdf{background:#1a2a3a;color:var(--accent);border:1px solid var(--accent);padding:12px 22px;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.btn-pdf:hover:not(:disabled){background:#243548;}
+.btn-pdf:disabled{background:#222;border-color:#333;color:#555;cursor:not-allowed;}
+.btn-send{background:#163d16;color:#fff;border:1px solid #2a6b2a;padding:12px 22px;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.btn-send:hover:not(:disabled){background:#1e5c1e;}
+.btn-send:disabled{background:#222;border-color:#333;color:#555;cursor:not-allowed;}
+/* ══ BOUTON DEVIS ══ */
+.btn-devis{background:var(--accent);color:var(--noir);border:none;padding:14px 28px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;display:inline-flex;align-items:center;gap:8px;margin-left:8px;}
+.btn-devis:hover{background:#f5c800;}
+#toast{position:fixed;bottom:28px;right:28px;background:#163d16;color:#fff;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:0.92rem;letter-spacing:1px;display:none;z-index:9999;border-left:4px solid var(--accent);animation:slideUp 0.3s ease;max-width:340px;}
+#toast.error{background:#3d1616;border-left-color:var(--rouge);}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.sep{border:none;border-top:1px solid var(--bordure);margin:6px 0 18px;}
+.mt12{margin-top:12px;}
+@media(max-width:640px){
+  .grid-2,.grid-3,.grid-4,.grid-gc,.car-diagrams,.sig-zone{grid-template-columns:1fr;}
+  header{flex-direction:column;align-items:flex-start;}
+  .titre-doc{text-align:left;font-size:1.4rem;}
+  .actions{justify-content:center;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="logo-zone">
+    <img id="garageLogo" src="" alt="Logo garage" style="display:none;">
+    <div id="garageLogoFallback" style="width:64px;height:64px;background:var(--gris2);border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;color:var(--accent);">🔧</div>
+    <p>Ordre de réparation</p>
+  </div>
+  <div class="titre-doc">Ordre de <span>Réparation</span></div>
+  <div style="text-align:right;font-size:0.78rem;color:var(--texte2);">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;color:var(--texte);" data-mpg="nom">MecaPulseGarage</div>
+    <div data-mpg="adresse">217 Chem. de Boudou, 31140 Launaguet</div>
+    <div>NIF : <input type="text" id="nif" data-mpg="nif" placeholder="N° NIF" style="width:130px;background:transparent;border:none;border-bottom:1px solid var(--bordure);color:var(--texte);font-size:0.78rem;outline:none;padding:2px 4px;"></div>
+    <div style="margin-top:6px;"><a href="parametres.html" style="color:var(--accent);font-size:0.7rem;text-decoration:none;letter-spacing:1px;">⚙ Paramètres du garage</a></div>
+  </div>
+</header>
+
+<div class="meta-line">
+  <div class="meta-item">N° OR : <input type="text" id="numOR" placeholder="OR-00001"></div>
+  <div class="meta-item">Date de réception : <input type="date" id="dateReception"></div>
+  <div class="meta-item">Date de restitution estimée : <input type="date" id="dateRestitution"></div>
+  <div class="meta-item">Conseiller : <input type="text" id="conseiller" placeholder="Nom du conseiller"></div>
+</div>
+
+<div class="grid-gc">
+  <section>
+    <div class="section-title">Garage</div>
+    <div class="grid-2">
+      <div class="field"><label>Garage</label><input type="text" id="nomGarage" data-mpg="nom" value="Meca Pulse Garage"></div>
+      <div class="field"><label>Adresse</label><input type="text" id="adresseGarage" data-mpg="adresse" value="217 Chemin de Boudou, 31140 Launaguet"></div>
+      <div class="field"><label>Email</label><input type="email" id="emailGarage" data-mpg="email" value="mecapulsegarage@gmail.com"></div>
+      <div class="field"><label>Tél</label><input type="tel" id="telGarage" data-mpg="tel" value="05 32 00 22 13"></div>
+    </div>
+  </section>
+  <section>
+    <div class="section-title">Client</div>
+    <div class="grid-2">
+      <div class="field"><label>Nom</label><input type="text" id="nomClient" placeholder="Mme DUPONT Marie"></div>
+      <div class="field"><label>Adresse</label><input type="text" id="adresseClient" placeholder="12 rue de la Paix"></div>
+      <div class="field"><label>Email</label><input type="email" id="emailClient" placeholder="client@email.fr"></div>
+      <div class="field"><label>Tél</label><input type="tel" id="telClient" placeholder="06 00 00 00 00"></div>
+    </div>
+  </section>
+</div>
+
+<hr class="sep">
+
+<section>
+  <div class="section-title">Véhicule</div>
+  <div class="grid-4">
+    <div class="field"><label>Immatriculation</label><input type="text" id="immat" placeholder="AB-123-CD" style="font-weight:600;font-size:1rem;letter-spacing:2px;"></div>
+    <div class="field"><label>Marque</label><input type="text" id="marque" placeholder="Citroën"></div>
+    <div class="field"><label>Modèle</label><input type="text" id="modele" placeholder="C3 Pluriel"></div>
+    <div class="field"><label>Année</label><input type="text" id="annee" placeholder="2006"></div>
+  </div>
+  <div class="grid-4 mt12">
+    <div class="field"><label>Version</label><input type="text" id="version" placeholder="1.1 i"></div>
+    <div class="field"><label>Code moteur</label><input type="text" id="codeMoteur" placeholder="NFU-TU5JP4"></div>
+    <div class="field"><label>Date 1ère immat.</label><input type="date" id="dateImmat"></div>
+    <div class="field"><label>N° VIN</label><input type="text" id="vin" placeholder="VF7A6NFU08..."></div>
+  </div>
+  <div class="grid-4 mt12">
+    <div class="field"><label>Boîte de vitesse</label>
+      <select id="boite"><option value="">— Sélectionner —</option><option>Manuelle</option><option>Automatique</option><option>Semi-automatique</option></select>
+    </div>
+    <div class="field"><label>Kilométrage</label><input type="text" id="km" placeholder="118 065 km"></div>
+    <div class="field"><label>Carburant</label>
+      <select id="carburant"><option value="">— Sélectionner —</option><option>Essence</option><option>Diesel</option><option>Électrique</option><option>Hybride</option><option>GPL</option></select>
+    </div>
+    <div class="field">
+      <label>Réservoir</label>
+      <div class="reservoir-wrap">
+        <span>Niveau :</span>
+        <button class="res-btn" onclick="setRes(this,'0')">0</button>
+        <button class="res-btn" onclick="setRes(this,'1/4')">1/4</button>
+        <button class="res-btn" onclick="setRes(this,'1/2')">1/2</button>
+        <button class="res-btn" onclick="setRes(this,'3/4')">3/4</button>
+        <button class="res-btn" onclick="setRes(this,'P')">P</button>
+      </div>
+      <input type="hidden" id="reservoir" value="">
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section>
+  <div class="section-title">État du véhicule à la réception</div>
+  <p style="font-size:0.74rem;color:var(--texte2);margin-bottom:10px;">Sélectionnez le type de dommage actif, puis dessinez sur les schémas au stylet ou à la souris.</p>
+  <div class="etat-row">
+    <button class="etat-check" id="btn-enfoncement" onclick="setDmg('enfoncement')">▲ Enfoncement</button>
+    <button class="etat-check" id="btn-rayure" onclick="setDmg('rayure')">— Rayure</button>
+    <button class="etat-check" id="btn-casse" onclick="setDmg('casse')">✕ Cassé</button>
+    <span style="font-size:0.72rem;color:var(--texte2);margin-left:10px;align-self:center;">← Sélectionner puis dessiner</span>
+  </div>
+  <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:0.72rem;color:var(--texte2);">Cric :</label>
+    <div class="oui-non" id="cric"><button onclick="toggleON(this,'cric')">Oui</button><button onclick="toggleNON(this,'cric')">Non</button></div>
+    <label style="font-size:0.72rem;color:var(--texte2);margin-left:16px;">Roue de secours :</label>
+    <div class="oui-non" id="roueSecours"><button onclick="toggleON(this,'roueSecours')">Oui</button><button onclick="toggleNON(this,'roueSecours')">Non</button></div>
+    <div class="field" style="flex:1;min-width:200px;">
+      <label>Effets personnels et accessoires</label>
+      <input type="text" id="effets" placeholder="Porte-vélos, tapis, GPS…">
+    </div>
+  </div>
+  <div class="car-diagrams">
+    <div class="car-diagram-box">
+      <h5>Vue de dessus</h5>
+      <div class="diagram-wrap" id="wrapDessus">
+        <svg class="diagram-svg" viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="260" height="220" fill="#f0f6ff"/>
+          <rect x="85" y="20" width="90" height="180" rx="18" fill="none" stroke="#2a6db5" stroke-width="2"/>
+          <rect x="98" y="65" width="64" height="90" rx="8" fill="#d0e4f7" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="62" y="28" width="22" height="34" rx="4" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="176" y="28" width="22" height="34" rx="4" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="62" y="158" width="22" height="34" rx="4" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="176" y="158" width="22" height="34" rx="4" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="90" y="16" width="20" height="7" rx="2" fill="#fff9c4" stroke="#2a6db5" stroke-width="1"/>
+          <rect x="150" y="16" width="20" height="7" rx="2" fill="#fff9c4" stroke="#2a6db5" stroke-width="1"/>
+          <rect x="90" y="197" width="20" height="7" rx="2" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1"/>
+          <rect x="150" y="197" width="20" height="7" rx="2" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1"/>
+          <text x="130" y="11" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">↑ AVANT</text>
+          <text x="130" y="218" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">↓ ARRIÈRE</text>
+        </svg>
+        <canvas class="diagram-canvas" id="cvDessus"></canvas>
+      </div>
+      <div class="canvas-actions"><button class="btn-canvas-clear" onclick="clearDiagram('cvDessus')">✕ Effacer</button></div>
+    </div>
+    <div class="car-diagram-box">
+      <h5>Vue de face / arrière</h5>
+      <div class="diagram-wrap" id="wrapFace">
+        <svg class="diagram-svg" viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="260" height="220" fill="#f0f6ff"/>
+          <rect x="70" y="18" width="120" height="72" rx="10" fill="#d0e4f7" stroke="#2a6db5" stroke-width="2"/>
+          <rect x="88" y="25" width="84" height="36" rx="4" fill="#e8f4fd" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="72" y="65" width="24" height="18" rx="4" fill="#fff9c4" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="164" y="65" width="24" height="18" rx="4" fill="#fff9c4" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="108" y="74" width="44" height="10" rx="3" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1"/>
+          <rect x="50" y="68" width="22" height="18" rx="3" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="188" y="68" width="22" height="18" rx="3" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <text x="130" y="12" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">VUE AVANT</text>
+          <line x1="30" y1="110" x2="230" y2="110" stroke="#2a6db5" stroke-width="1" stroke-dasharray="4,3"/>
+          <rect x="70" y="118" width="120" height="72" rx="10" fill="#d0e4f7" stroke="#2a6db5" stroke-width="2"/>
+          <rect x="88" y="125" width="84" height="34" rx="4" fill="#e8f4fd" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="72" y="160" width="24" height="16" rx="4" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="164" y="160" width="24" height="16" rx="4" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="108" y="172" width="44" height="10" rx="2" fill="#c5cae9" stroke="#2a6db5" stroke-width="1"/>
+          <rect x="50" y="162" width="22" height="18" rx="3" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="188" y="162" width="22" height="18" rx="3" fill="#b0c8e8" stroke="#2a6db5" stroke-width="1.5"/>
+          <text x="130" y="208" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">VUE ARRIÈRE</text>
+        </svg>
+        <canvas class="diagram-canvas" id="cvFace"></canvas>
+      </div>
+      <div class="canvas-actions"><button class="btn-canvas-clear" onclick="clearDiagram('cvFace')">✕ Effacer</button></div>
+    </div>
+  </div>
+  <div class="car-diagrams">
+    <div class="car-diagram-box">
+      <h5>Vue côté gauche</h5>
+      <div class="diagram-wrap" id="wrapGauche">
+        <svg class="diagram-svg" viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg">
+          <rect width="380" height="130" fill="#f0f6ff"/>
+          <path d="M30,95 L30,68 Q40,42 90,36 L290,36 Q340,36 350,68 L350,95 Z" fill="#d0e4f7" stroke="#2a6db5" stroke-width="2"/>
+          <path d="M90,68 Q100,30 130,24 L250,24 Q280,26 290,68 Z" fill="#c0d8f0" stroke="#2a6db5" stroke-width="1.5"/>
+          <ellipse cx="42" cy="76" rx="11" ry="8" fill="#fff9c4" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="336" y="68" width="15" height="11" rx="3" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="95" cy="103" r="22" fill="#b0c8e8" stroke="#2a6db5" stroke-width="2"/>
+          <circle cx="95" cy="103" r="13" fill="#d0e4f7" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="95" cy="103" r="4" fill="#2a6db5"/>
+          <circle cx="285" cy="103" r="22" fill="#b0c8e8" stroke="#2a6db5" stroke-width="2"/>
+          <circle cx="285" cy="103" r="13" fill="#d0e4f7" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="285" cy="103" r="4" fill="#2a6db5"/>
+          <rect x="30" y="93" width="320" height="8" rx="3" fill="#c0d8f0" stroke="#2a6db5" stroke-width="1"/>
+          <text x="190" y="127" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">CÔTÉ GAUCHE</text>
+        </svg>
+        <canvas class="diagram-canvas" id="cvGauche"></canvas>
+      </div>
+      <div class="canvas-actions"><button class="btn-canvas-clear" onclick="clearDiagram('cvGauche')">✕ Effacer</button></div>
+    </div>
+    <div class="car-diagram-box">
+      <h5>Vue côté droit</h5>
+      <div class="diagram-wrap" id="wrapDroit">
+        <svg class="diagram-svg" viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg">
+          <rect width="380" height="130" fill="#f0f6ff"/>
+          <path d="M350,95 L350,68 Q340,42 290,36 L90,36 Q40,36 30,68 L30,95 Z" fill="#d0e4f7" stroke="#2a6db5" stroke-width="2"/>
+          <path d="M290,68 Q280,30 250,24 L130,24 Q100,26 90,68 Z" fill="#c0d8f0" stroke="#2a6db5" stroke-width="1.5"/>
+          <ellipse cx="338" cy="76" rx="11" ry="8" fill="#fff9c4" stroke="#2a6db5" stroke-width="1.5"/>
+          <rect x="29" y="68" width="15" height="11" rx="3" fill="#ffcdd2" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="285" cy="103" r="22" fill="#b0c8e8" stroke="#2a6db5" stroke-width="2"/>
+          <circle cx="285" cy="103" r="13" fill="#d0e4f7" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="285" cy="103" r="4" fill="#2a6db5"/>
+          <circle cx="95" cy="103" r="22" fill="#b0c8e8" stroke="#2a6db5" stroke-width="2"/>
+          <circle cx="95" cy="103" r="13" fill="#d0e4f7" stroke="#2a6db5" stroke-width="1.5"/>
+          <circle cx="95" cy="103" r="4" fill="#2a6db5"/>
+          <rect x="30" y="93" width="320" height="8" rx="3" fill="#c0d8f0" stroke="#2a6db5" stroke-width="1"/>
+          <text x="190" y="127" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="#2a6db5" font-weight="600">CÔTÉ DROIT</text>
+        </svg>
+        <canvas class="diagram-canvas" id="cvDroit"></canvas>
+      </div>
+      <div class="canvas-actions"><button class="btn-canvas-clear" onclick="clearDiagram('cvDroit')">✕ Effacer</button></div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section>
+  <div class="section-title">Réparations à effectuer</div>
+  <div class="field">
+    <textarea id="reparations" style="min-height:110px;" placeholder="Décrire les réparations, pannes, travaux demandés…"></textarea>
+  </div>
+  <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <button class="btn-arabic" id="btnArabic" onclick="traduireArabe()">🌙 Traduire en arabe → PDF mécanicien</button>
+  </div>
+  <div class="grid-2 mt12">
+    <div class="field">
+      <label>Pièces d'occasion acceptées</label>
+      <div class="oui-non" id="piecesOcc"><button onclick="toggleON(this,'piecesOcc')">Oui</button><button onclick="toggleNON(this,'piecesOcc')">Non</button></div>
+    </div>
+    <div class="field">
+      <label>Client souhaite récupérer les anciennes pièces</label>
+      <div class="oui-non" id="anciennesPieces"><button onclick="toggleON(this,'anciennesPieces')">Oui</button><button onclick="toggleNON(this,'anciennesPieces')">Non</button></div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section>
+  <div class="section-title">Signatures</div>
+  <div class="sig-zone">
+    <div class="sig-box">
+      <h4>Signature du client</h4>
+      <canvas class="sig-canvas" id="sigClient" width="340" height="110"></canvas>
+      <div class="sig-actions">
+        <button class="btn-clear" onclick="clearSig('sigClient')">✕ Effacer</button>
+        <span class="sig-note">Je confirme l'état ci-dessus</span>
+      </div>
+    </div>
+    <div class="sig-box">
+      <h4>Signature du garagiste</h4>
+      <canvas class="sig-canvas" id="sigGarage" width="340" height="110"></canvas>
+      <div class="sig-actions">
+        <button class="btn-clear" onclick="clearSig('sigGarage')">✕ Effacer</button>
+        <span class="sig-note">Prise en charge confirmée</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section>
+  <div class="section-title">Conditions Générales</div>
+  <div style="background:var(--gris);border:1px solid var(--bordure);padding:16px 18px;font-size:0.76rem;color:var(--texte2);line-height:1.8;">
+    Le présent ordre de réparation constitue un accord entre le client et le garage. Les travaux ne seront effectués que dans la limite du devis accepté. Les pièces remplacées sont tenues à disposition du client pendant 30 jours. Le garage ne pourra être tenu responsable des objets de valeur laissés dans le véhicule. Tout véhicule non réclamé dans les 30 jours suivant la fin des travaux pourra faire l'objet d'une mise en fourrière.
+  </div>
+</section>
+
+<div class="actions">
+  <button class="btn-secondary" onclick="resetForm()">Réinitialiser</button>
+  <button class="btn-primary" onclick="window.print()">🖨 Imprimer</button>
+  <button class="btn-pdf" id="btnPdf" onclick="telechargerPDF()">⬇ Télécharger PDF</button>
+  <button class="btn-send" id="btnSend" onclick="envoyerMail()">✉ Envoyer au client</button>
+  <button class="btn-devis" onclick="sauverEtAllerAuDevis()">📋 PASSER AU DEVIS →</button>
+</div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+function canvasToGrayscale(s){const d=document.createElement('canvas');d.width=s.width;d.height=s.height;const c=d.getContext('2d');c.drawImage(s,0,0);const id=c.getImageData(0,0,d.width,d.height),dt=id.data;for(let i=0;i<dt.length;i+=4){const g=Math.round(0.299*dt[i]+0.587*dt[i+1]+0.114*dt[i+2]);dt[i]=dt[i+1]=dt[i+2]=g;}c.putImageData(id,0,0);return d;}
+
+document.getElementById('dateReception').valueAsDate=new Date();
+mpgApplySettings();
+mpgBindAutoSave();
+mpgApplyLogo('garageLogo','garageLogoFallback');
+
+function toggleON(btn,id){document.getElementById(id).querySelectorAll('button').forEach(b=>b.classList.remove('active-oui','active-non'));btn.classList.add('active-oui');}
+function toggleNON(btn,id){document.getElementById(id).querySelectorAll('button').forEach(b=>b.classList.remove('active-oui','active-non'));btn.classList.add('active-non');}
+function setRes(btn,val){document.querySelectorAll('.res-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('reservoir').value=val;}
+
+let currentDmg='rayure';
+const dmgColors={enfoncement:'#ff9800',rayure:'#e8b400',casse:'#e53935'};
+function setDmg(type){currentDmg=type;document.querySelectorAll('.etat-check').forEach(b=>b.classList.remove('active-enfoncement','active-rayure','active-casse'));document.getElementById('btn-'+type).classList.add('active-'+type);}
+
+const diagramIds=['cvDessus','cvFace','cvGauche','cvDroit'];
+function initDiagram(canvasId){
+  const canvas=document.getElementById(canvasId),wrap=canvas.parentElement,svg=wrap.querySelector('svg'),dpr=window.devicePixelRatio||1;
+  function resize(){const w=wrap.offsetWidth,vb=svg.viewBox.baseVal,h=w*vb.height/vb.width;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';canvas.getContext('2d').scale(dpr,dpr);}
+  resize();
+  const ctx=canvas.getContext('2d');let drawing=false;
+  function gp(e){const r=canvas.getBoundingClientRect(),sx=(canvas.width/dpr)/r.width,sy=(canvas.height/dpr)/r.height,s=e.touches?e.touches[0]:e;return[(s.clientX-r.left)*sx,(s.clientY-r.top)*sy];}
+  function start(e){e.preventDefault();drawing=true;ctx.beginPath();ctx.strokeStyle=dmgColors[currentDmg];ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';const[x,y]=gp(e);ctx.moveTo(x,y);}
+  function draw(e){if(!drawing)return;e.preventDefault();const[x,y]=gp(e);ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y);}
+  function stop(){drawing=false;}
+  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',draw);canvas.addEventListener('mouseup',stop);canvas.addEventListener('mouseleave',stop);
+  canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',draw,{passive:false});canvas.addEventListener('touchend',stop);
+}
+function clearDiagram(id){const c=document.getElementById(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+window.addEventListener('load',()=>{setDmg('rayure');setTimeout(()=>diagramIds.forEach(id=>initDiagram(id)),100);});
+
+function initSig(id){
+  const c=document.getElementById(id),dpr=window.devicePixelRatio||1;
+  c.width=c.offsetWidth*dpr;c.height=110*dpr;
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);ctx.strokeStyle='#e8b400';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+  let dr=false;
+  function gp(e){const r=c.getBoundingClientRect(),sx=(c.width/dpr)/r.width,sy=(c.height/dpr)/r.height,s=e.touches?e.touches[0]:e;return[(s.clientX-r.left)*sx,(s.clientY-r.top)*sy];}
+  c.addEventListener('mousedown',e=>{dr=true;ctx.beginPath();ctx.moveTo(...gp(e));});
+  c.addEventListener('mousemove',e=>{if(!dr)return;ctx.lineTo(...gp(e));ctx.stroke();});
+  c.addEventListener('mouseup',()=>dr=false);c.addEventListener('mouseleave',()=>dr=false);
+  c.addEventListener('touchstart',e=>{e.preventDefault();dr=true;ctx.beginPath();ctx.moveTo(...gp(e));},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!dr)return;ctx.lineTo(...gp(e));ctx.stroke();},{passive:false});
+  c.addEventListener('touchend',()=>dr=false);
+}
+function clearSig(id){const c=document.getElementById(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+initSig('sigClient');initSig('sigGarage');
+
+function resetForm(){
+  if(!confirm('Réinitialiser tout le formulaire ?'))return;
+  document.querySelectorAll('input[type="text"],input[type="date"],input[type="tel"],input[type="email"],textarea').forEach(el=>{if(!['nomGarage','adresseGarage','emailGarage','telGarage','siren'].includes(el.id))el.value='';});
+  document.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
+  document.querySelectorAll('.oui-non button').forEach(b=>b.classList.remove('active-oui','active-non'));
+  document.querySelectorAll('.res-btn').forEach(b=>b.classList.remove('active'));
+  clearSig('sigClient');clearSig('sigGarage');
+  diagramIds.forEach(id=>clearDiagram(id));
+  document.getElementById('dateReception').valueAsDate=new Date();
+}
+
+function showToast(msg,isError){const t=document.getElementById('toast');t.textContent=msg;t.className=isError?'error':'';t.style.display='block';setTimeout(()=>t.style.display='none',4500);}
+
+// ══════════════════════════════════════════
+// ✅ PASSER AU DEVIS — transfère les données
+// ══════════════════════════════════════════
+function sauverEtAllerAuDevis(){
+  const data={
+    orNum        : document.getElementById('numOR')?.value||'',
+    dateRecep    : document.getElementById('dateReception')?.value||'',
+    conseiller   : document.getElementById('conseiller')?.value||'',
+    clientNom    : document.getElementById('nomClient')?.value||'',
+    clientAdresse: document.getElementById('adresseClient')?.value||'',
+    clientTel    : document.getElementById('telClient')?.value||'',
+    clientEmail  : document.getElementById('emailClient')?.value||'',
+    immat        : document.getElementById('immat')?.value||'',
+    marque       : (document.getElementById('marque')?.value||'')+' '+(document.getElementById('modele')?.value||''),
+    annee        : document.getElementById('annee')?.value||'',
+    km           : document.getElementById('km')?.value||'',
+    vin          : document.getElementById('vin')?.value||'',
+    moteur       : document.getElementById('codeMoteur')?.value||'',
+    reparations  : document.getElementById('reparations')?.value||''
+  };
+  localStorage.setItem('or_to_devis',JSON.stringify(data));
+  window.location.href='devis.html';
+}
+
+async function traduireArabe(){
+  const reparations=document.getElementById('reparations').value.trim();
+  if(!reparations){showToast('⚠ Saisissez les réparations',true);return;}
+  const btn=document.getElementById('btnArabic');btn.disabled=true;btn.textContent='⏳ Génération…';
+  const dict={'vidange':'تغيير الزيت','huile moteur':'زيت المحرك','huile':'زيت','filtre à huile':'فلتر الزيت','filtre air':'فلتر الهواء','filtre':'فلتر','frein':'فرامل','freins':'فرامل','plaquettes':'تيل الفرامل','disque':'قرص','pneus':'إطارات','pneu':'إطار','batterie':'بطارية','alternateur':'دينامو','démarreur':'سيلونيد','embrayage':'كلاتش','boîte de vitesse':'صندوق التروس','transmission':'ناقل الحركة','courroie de distribution':'حزام التوزيع','courroie':'حزام','radiateur':'رادياتير','climatisation':'تكييف','échappement':'عادم','injection':'حقن','injecteur':'بخاخ','amortisseur avant':'ماص الصدمات الأمامي','amortisseur arrière':'ماص الصدمات الخلفي','amortisseur':'ماص الصدمات','direction':'توجيه','géométrie':'ضبط الإطارات','révision':'صيانة دورية','réparation':'تصليح','remplacement':'تبديل','vérification':'فحص','diagnostic':'تشخيص','contrôle':'مراقبة','moteur':'محرك','joint de culasse':'حشية الرأس','joint':'حشية','fuite':'تسرب','phares':'مصابيح أمامية','bougie':'شمعة الإشعال','bougies':'شمعات الإشعال','changement':'تغيير','changer':'تغيير','remplacer':'استبدال','vérifier':'فحص','réparer':'إصلاح','avant':'أمامي','arrière':'خلفي','gauche':'أيسر','droit':'أيمن'};
+  let texteAr=reparations;
+  Object.entries(dict).sort((a,b)=>b[0].length-a[0].length).forEach(([fr,ar])=>{texteAr=texteAr.replace(new RegExp(fr.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),ar);});
+  const g=id=>document.getElementById(id)?.value||'—';
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;top:0;left:-9999px;width:794px;background:#fff;color:#000;font-family:Cairo,Arial,sans-serif;direction:rtl;padding:0;margin:0;';
+  div.innerHTML=`<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet"><div style="background:#f0f0f0;padding:18px 30px;text-align:center;border-bottom:2px solid #333;"><div style="font-size:22px;font-weight:700;">${g('nomGarage')!=='—'?g('nomGarage'):'Garage'}</div><div style="font-size:11px;color:#555;">${g('adresseGarage')!=='—'?g('adresseGarage'):''} ${g('telGarage')!=='—'?'| '+g('telGarage'):''}</div></div><div style="text-align:center;padding:20px 0 10px;"><div style="font-size:28px;font-weight:700;font-family:Cairo,sans-serif;">أمر الإصلاح</div></div><div style="height:2px;background:#000;margin:0 30px;"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 30px;"><div style="background:#f5f5f5;padding:16px;border-right:3px solid #000;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">معلومات العميل</div><div style="font-size:12px;">${g('nomClient')}</div><div style="font-size:12px;">${g('telClient')}</div></div><div style="background:#f5f5f5;padding:16px;border-right:3px solid #000;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">معلومات السيارة</div><div style="font-size:13px;font-weight:700;letter-spacing:2px;">${g('immat')}</div><div style="font-size:12px;">${g('marque')} ${g('modele')} — ${g('km')} km</div></div></div><div style="margin:0 30px 12px;"><div style="background:#ddd;padding:10px 16px;font-size:13px;font-weight:700;text-align:center;border:1px solid #aaa;">الأعمال المطلوبة (فرنسي)</div><div style="background:#f5f5f5;padding:16px;border:1px solid #ccc;border-top:none;font-size:13px;direction:ltr;">${reparations.replace(/\n/g,'<br>')}</div></div><div style="margin:0 30px 20px;"><div style="background:#ddd;padding:10px 16px;font-size:13px;font-weight:700;text-align:center;border:1px solid #aaa;">الترجمة بالعربية</div><div style="background:#f9f9f9;padding:20px 16px;border:1px solid #ccc;border-top:none;text-align:right;font-size:16px;line-height:2.2;font-family:Cairo,sans-serif;">${texteAr.replace(/\n/g,'<br>')}</div></div>`;
+  document.body.appendChild(div);
+  await new Promise(r=>setTimeout(r,800));
+  try{
+    const canvas=await html2canvas(div,{scale:2,useCORS:true,backgroundColor:'#fff',logging:false,width:794});
+    const gray=canvasToGrayscale(canvas);
+    const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pW=pdf.internal.pageSize.getWidth(),pH=pdf.internal.pageSize.getHeight(),ratio=pW/gray.width,totalH=gray.height*ratio;let yPos=0;
+    while(yPos<totalH){if(yPos>0)pdf.addPage();const srcY=yPos/ratio,srcH=Math.min(gray.height-srcY,pH/ratio),pg=document.createElement('canvas');pg.width=gray.width;pg.height=srcH;pg.getContext('2d').drawImage(gray,0,srcY,gray.width,srcH,0,0,gray.width,srcH);pdf.addImage(pg.toDataURL('image/jpeg',0.95),'JPEG',0,0,pW,srcH*ratio);yPos+=pH;}
+    pdf.save('OR_Arabe_'+g('immat')+'_'+g('dateReception')+'.pdf');showToast('✅ PDF arabe généré !');
+  }catch(e){showToast('❌ Erreur PDF',true);}
+  finally{document.body.removeChild(div);btn.disabled=false;btn.textContent='🌙 Traduire en arabe → PDF mécanicien';}
+}
+
+async function telechargerPDF(){
+  const btn=document.getElementById('btnPdf');btn.disabled=true;btn.textContent='⏳ Génération…';
+  try{
+    const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const PW=210,PH=297,ML=12,MR=12,MT=10,CW=186;let y=MT;
+    const g=id=>(document.getElementById(id)||{}).value||'';
+    const lbl=id=>{const el=document.getElementById(id);if(!el)return'';if(el.tagName==='SELECT')return el.options[el.selectedIndex]?.text||'';return el.value||'';};
+    const ouiNon=id=>{const o=document.querySelector(`#${id} .active-oui`),n=document.querySelector(`#${id} .active-non`);return o?'OUI':n?'NON':'—';};
+    const res=document.getElementById('reservoir').value||'—';
+    async function diag2url(svgId,cvId){
+      const svg=document.querySelector(`#wrap${svgId} .diagram-svg`),cv=document.getElementById(cvId);if(!svg)return null;
+      const vb=svg.viewBox.baseVal,W=600,H=Math.round(W*vb.height/vb.width),b64='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(svg))));
+      return new Promise(res2=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,W,H);if(cv&&cv.width>0)ctx.drawImage(cv,0,0,W,H);res2(c.toDataURL('image/png'));};img.onerror=()=>res2(null);img.src=b64;});
+    }
+    function sig2url(id){const c=document.getElementById(id);if(!c)return null;const tmp=document.createElement('canvas');tmp.width=c.width;tmp.height=c.height;const ctx=tmp.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,tmp.width,tmp.height);ctx.drawImage(c,0,0);return tmp.toDataURL('image/png');}
+    const[iD,iF,iG,iDr]=await Promise.all([diag2url('Dessus','cvDessus'),diag2url('Face','cvFace'),diag2url('Gauche','cvGauche'),diag2url('Droit','cvDroit')]);
+    const sC=sig2url('sigClient'),sG=sig2url('sigGarage');
+    async function logo2url(){const im=document.querySelector('.logo-zone img');if(!im||!im.src)return null;return new Promise(r2=>{const c=document.createElement('canvas');c.width=80;c.height=80;const tmp=new Image();tmp.onload=()=>{c.getContext('2d').drawImage(tmp,0,0,80,80);r2(c.toDataURL('image/png'));};tmp.onerror=()=>r2(null);tmp.src=im.src;});}
+    const logo=await logo2url();
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.4);pdf.rect(ML,y,CW,16,'FD');
+    if(logo)pdf.addImage(logo,'PNG',ML+2,y+1,14,14);
+    pdf.setFont('helvetica','bold');pdf.setFontSize(16);pdf.setTextColor(20,20,20);pdf.text('ORDRE DE RÉPARATION',ML+19,y+10);
+    pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');pdf.setTextColor(60,60,60);pdf.text(g('nomGarage')||'Garage',PW-MR,y+4,{align:'right'});
+    pdf.setFont('helvetica','normal');pdf.text(g('adresseGarage')||'',PW-MR,y+8,{align:'right'});pdf.text('Tél : '+(g('telGarage')||''),PW-MR,y+12,{align:'right'});y+=19;
+    pdf.setFillColor(240,240,240);pdf.rect(ML,y,CW,10,'F');pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.3);pdf.rect(ML,y,CW,10,'S');
+    pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(60,60,60);pdf.text('N° OR :',ML+3,y+4);pdf.setFont('helvetica','normal');pdf.text(g('numOR')||'—',ML+18,y+4);
+    pdf.setFont('helvetica','bold');pdf.text('Réception :',ML+3,y+8.5);pdf.setFont('helvetica','normal');pdf.text(g('dateReception')||'—',ML+22,y+8.5);
+    pdf.setFont('helvetica','bold');pdf.text('Restitution :',CW/2+ML,y+8.5);pdf.setFont('helvetica','normal');pdf.text(g('dateRestitution')||'—',CW/2+ML+24,y+8.5);y+=13;
+    function st(txt){pdf.setFillColor(220,220,220);pdf.setDrawColor(160,160,160);pdf.setLineWidth(0.3);pdf.rect(ML,y,CW,6,'FD');pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.setTextColor(20,20,20);pdf.text(txt.toUpperCase(),ML+3,y+4.2);y+=8;}
+    function fi(lb,val,x,fw){pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.setTextColor(100,100,100);pdf.text(lb.toUpperCase(),x,y);pdf.setFillColor(248,248,248);pdf.setDrawColor(200,200,200);pdf.setLineWidth(0.2);pdf.rect(x,y+1,fw,6,'FD');pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(20,20,20);pdf.text(pdf.splitTextToSize(String(val||''),fw-2)[0]||'',x+1.5,y+5.5);}
+    const hw=(CW-4)/2;
+    st('Garage');fi('Garage',g('nomGarage'),ML,hw);fi('Adresse',g('adresseGarage'),ML+hw+4,hw);y+=8;fi('Email',g('emailGarage'),ML,hw);fi('Tél',g('telGarage'),ML+hw+4,hw);y+=10;
+    st('Client');fi('Nom',g('nomClient'),ML,hw);fi('Adresse',g('adresseClient'),ML+hw+4,hw);y+=8;fi('Email',g('emailClient'),ML,hw);fi('Tél',g('telClient'),ML+hw+4,hw);y+=12;
+    st('Véhicule');const qw=(CW-6)/4;fi('Immat.',g('immat'),ML,qw);fi('Marque',g('marque'),ML+qw+2,qw);fi('Modèle',g('modele'),ML+(qw+2)*2,qw);fi('Année',g('annee'),ML+(qw+2)*3,qw);y+=8;
+    fi('Code moteur',g('codeMoteur'),ML,qw);fi('VIN',g('vin'),ML+qw+2,qw);fi('Boîte',lbl('boite'),ML+(qw+2)*2,qw);fi('Carburant',lbl('carburant'),ML+(qw+2)*3,qw);y+=8;
+    fi('Kilométrage',g('km'),ML,qw);fi('Réservoir',res,ML+qw+2,qw);fi('Cric',ouiNon('cric'),ML+(qw+2)*2,qw);fi('Roue sec.',ouiNon('roueSecours'),ML+(qw+2)*3,qw);y+=12;
+    st('État du véhicule');pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);pdf.setTextColor(50,50,50);pdf.text('Effets : '+(g('effets')||'—'),ML+2,y+3);y+=7;
+    const dW=(CW-4)/2,dH260=dW*220/260,dH130=dW*130/380;
+    if(iD)pdf.addImage(iD,'PNG',ML,y,dW,dH260);if(iF)pdf.addImage(iF,'PNG',ML+dW+4,y,dW,dH260);
+    pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.setTextColor(80,80,80);pdf.text('VUE DESSUS',ML+dW/2,y-1,{align:'center'});pdf.text('VUE FACE/ARRIÈRE',ML+dW+4+dW/2,y-1,{align:'center'});y+=dH260+3;
+    if(iG)pdf.addImage(iG,'PNG',ML,y,dW,dH130);if(iDr)pdf.addImage(iDr,'PNG',ML+dW+4,y,dW,dH130);
+    pdf.text('VUE CÔTÉ GAUCHE',ML+dW/2,y-1,{align:'center'});pdf.text('VUE CÔTÉ DROIT',ML+dW+4+dW/2,y-1,{align:'center'});y+=dH130+6;
+    pdf.addPage();y=MT;
+    st('Réparations à effectuer');const rL=pdf.splitTextToSize(g('reparations')||'—',CW-4),rH=Math.max(20,rL.length*4.5+4);pdf.setFillColor(248,248,248);pdf.setDrawColor(200,200,200);pdf.setLineWidth(0.2);pdf.rect(ML,y,CW,rH,'FD');pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(20,20,20);pdf.text(rL,ML+2,y+5);y+=rH+4;
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.setTextColor(60,60,60);pdf.text('Pièces occasion : '+ouiNon('piecesOcc'),ML+2,y);pdf.text('Récup. anciennes pièces : '+ouiNon('anciennesPieces'),ML+95,y);y+=10;
+    st('Signatures');const sW=(CW-4)/2,sH=28;
+    pdf.setFillColor(248,248,248);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.3);pdf.rect(ML,y,sW,sH,'FD');pdf.rect(ML+sW+4,y,sW,sH,'FD');
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(80,80,80);pdf.text('SIGNATURE DU CLIENT',ML+2,y+4);pdf.text('SIGNATURE DU GARAGISTE',ML+sW+6,y+4);
+    if(sC)pdf.addImage(sC,'PNG',ML+1,y+5,sW-2,sH-8);if(sG)pdf.addImage(sG,'PNG',ML+sW+5,y+5,sW-2,sH-8);
+    pdf.setFont('helvetica','italic');pdf.setFontSize(6.5);pdf.setTextColor(120,120,120);pdf.text('Je confirme l\'état ci-dessus',ML+2,y+sH-2);pdf.text('Prise en charge confirmée',ML+sW+6,y+sH-2);y+=sH+8;
+    const total=pdf.internal.getNumberOfPages();for(let i=1;i<=total;i++){pdf.setPage(i);pdf.setDrawColor(180,180,180);pdf.setLineWidth(0.3);pdf.line(ML,PH-10,PW-MR,PH-10);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);pdf.setTextColor(130,130,130);pdf.text((g('nomGarage')||'Garage')+' — '+(g('adresseGarage')||'')+' — '+(g('telGarage')||''),ML,PH-6);pdf.text('Page '+i+'/'+total,PW-MR,PH-6,{align:'right'});}
+    pdf.save('OR_'+(g('immat')||'vehicule')+'_'+(g('dateReception')||new Date().toISOString().slice(0,10))+'.pdf');showToast('✅ PDF généré !');
+  }catch(e){console.error(e);showToast('❌ Erreur PDF : '+e.message,true);}
+  finally{btn.disabled=false;btn.textContent='⬇ Télécharger PDF';}
+}
+
+function envoyerMail(){
+  const emailClient=document.getElementById('emailClient').value.trim();
+  if(!emailClient||!emailClient.includes('@')){showToast('⚠ Email client requis',true);return;}
+  const g=id=>document.getElementById(id)?.value||'';
+  const nomG=document.getElementById('nomGarage')?.value||'Le garage';
+  const sujet=`Ordre de réparation ${g('numOR')||''} — ${g('immat')||''}`;
+  const corps=`Bonjour ${g('nomClient')||''},\n\nVoici le récapitulatif de votre véhicule ${g('marque')} ${g('modele')} (${g('immat')}) :\nKilométrage : ${g('km')}\nRéparations prévues : ${g('reparations')||'Non précisé'}\n\nMerci de trouver le PDF en pièce jointe (à joindre manuellement si téléchargé séparément).\n\nCordialement,\n${nomG}`;
+  mpgOpenGmail(emailClient,sujet,corps);
+  showToast('✅ Gmail ouvert — pensez à joindre le PDF téléchargé');
+}
+</script>
+</body>
+</html>

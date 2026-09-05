@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paramètres — MecaPulse</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#2a2a2a;--vert:#4caf50;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
+.container{max-width:640px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:28px;}
+.titre{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.titre span{color:var(--accent);}
+.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-retour:hover{border-color:var(--texte2);color:var(--texte);}
+section{margin-bottom:26px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:500;}
+input{background:var(--gris);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:10px 12px;font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;width:100%;}
+input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
+.hint{font-size:.72rem;color:var(--texte2);margin-top:-8px;margin-bottom:16px;line-height:1.6;}
+.btn-save{width:100%;background:var(--accent);color:#000;border:none;padding:15px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-top:8px;}
+.btn-save:hover{background:#f5c800;}
+#toast{position:fixed;bottom:24px;right:24px;background:#163d16;color:#fff;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:1px;display:none;z-index:999;border-left:4px solid var(--vert);}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="titre">Paramètres <span>Garage</span></div>
+    <a class="btn-retour" href="index.html">← Retour</a>
+  </header>
+
+  <section>
+    <div class="section-title">Identité du garage</div>
+    <div class="hint">Ces informations apparaissent sur les ordres de réparation, devis et PDF générés. À remplir une seule fois par garage.</div>
+    <div class="field">
+      <label>Logo du garage</label>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div id="logo-preview" style="width:64px;height:64px;background:var(--gris);border:2px solid var(--bordure);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          <img id="logo-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:none;">
+          <span id="logo-placeholder" style="font-size:1.4rem;">🔧</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <input type="file" id="s-logo-file" accept="image/*" style="padding:0;border:none;">
+          <button type="button" onclick="removeLogo()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le logo</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Nom du garage</label><input id="s-nom" placeholder="Ex : Garage El Fath"></div>
+    <div class="field"><label>Adresse</label><input id="s-adresse" placeholder="Ex : Cité 500 Logts, Bir Mourad Raïs, Alger"></div>
+    <div class="grid-2">
+      <div class="field"><label>Téléphone</label><input id="s-tel" placeholder="0550 00 00 00"></div>
+      <div class="field"><label>Email</label><input id="s-email" type="email" placeholder="contact@mongarage.dz"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">Identifiants fiscaux (optionnel)</div>
+    <div class="grid-2">
+      <div class="field"><label>NIF</label><input id="s-nif" placeholder="Numéro d'identification fiscale"></div>
+      <div class="field"><label>RC</label><input id="s-rc" placeholder="Registre de commerce"></div>
+    </div>
+    <div class="field"><label>Article d'imposition (AI)</label><input id="s-ai" placeholder="N° AI"></div>
+  </section>
+
+  <section>
+    <div class="section-title">Noms des mécaniciens</div>
+    <div class="hint">Utilisés dans la planification des rendez-vous.</div>
+    <div class="field"><label>Mécanicien A</label><input id="s-mecaA" placeholder="Mécanicien A"></div>
+    <div class="field"><label>Mécanicien B</label><input id="s-mecaB" placeholder="Mécanicien B"></div>
+    <div class="field"><label>Mécanicien C</label><input id="s-mecaC" placeholder="Mécanicien C"></div>
+  </section>
+
+  <button class="btn-save" onclick="saveAll()">💾 Enregistrer</button>
+</div>
+<div id="toast"></div>
+
+<script src="assets/settings.js"></script>
+<script>
+let currentLogo = '';
+
+function showLogoPreview(dataUrl){
+  const img=document.getElementById('logo-img'), ph=document.getElementById('logo-placeholder');
+  if(dataUrl){ img.src=dataUrl; img.style.display='block'; ph.style.display='none'; }
+  else{ img.src=''; img.style.display='none'; ph.style.display='block'; }
+}
+
+function removeLogo(){
+  currentLogo='';
+  showLogoPreview('');
+  document.getElementById('s-logo-file').value='';
+}
+
+document.getElementById('s-logo-file').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{ currentLogo = reader.result; showLogoPreview(currentLogo); };
+  reader.readAsDataURL(file);
+});
+
+function loadAll(){
+  const s = mpgGetSettings();
+  ['nom','adresse','tel','email','nif','rc','ai','mecaA','mecaB','mecaC'].forEach(k=>{
+    const el = document.getElementById('s-'+k);
+    if(el) el.value = s[k] === MPG_DEFAULTS[k] && !s[k] ? '' : (s[k] || '');
+  });
+  currentLogo = s.logo || '';
+  showLogoPreview(currentLogo);
+}
+function saveAll(){
+  const data = { logo: currentLogo };
+  ['nom','adresse','tel','email','nif','rc','ai','mecaA','mecaB','mecaC'].forEach(k=>{
+    const el = document.getElementById('s-'+k);
+    data[k] = el ? el.value.trim() : '';
+  });
+  mpgSaveSettings(data);
+  const t=document.getElementById('toast');
+  t.textContent='✅ Paramètres enregistrés';t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+loadAll();
+</script>
+</body>
+</html>

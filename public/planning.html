@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planning RDV — MecaPulse Garage</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="assets/settings.js"></script>
+<style>
+:root{
+  --noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--gris3:#252525;--gris4:#2e2e2e;
+  --accent:#e8b400;--accent2:#f5c800;
+  --texte:#f0ece4;--texte2:#a89f8c;--texte3:#555;
+  --bordure:#2a2a2a;--rouge:#e53935;--vert:#4caf50;
+  --mA:#e8b400;--mB:#e53935;--mC:#4caf50;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{max-width:100%;overflow-x:hidden;}
+body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;min-height:100vh;}
+
+.header{background:var(--gris);border-bottom:2px solid var(--accent);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:3px;}
+.logo span{color:var(--accent);}
+.header-sub{font-size:.62rem;color:var(--texte2);text-transform:uppercase;letter-spacing:2px;margin-top:1px;}
+.badge-client{background:var(--gris3);border:1px solid var(--bordure);padding:5px 12px;font-size:.72rem;color:var(--texte2);white-space:nowrap;}
+.badge-client strong{color:var(--accent);}
+.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.btn-retour:hover{border-color:var(--texte2);color:var(--texte);}
+
+.main{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 56px);}
+
+/* PANEL */
+.panel{background:var(--gris);border-right:1px solid var(--bordure);padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);border-left:3px solid var(--accent);padding-left:9px;margin-bottom:12px;}
+
+.recap-box{background:var(--gris2);border:1px solid var(--bordure);}
+.recap-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--bordure);font-size:.75rem;}
+.recap-row:last-child{border-bottom:none;}
+.recap-row label{color:var(--texte2);flex-shrink:0;margin-right:8px;}
+.recap-row span{color:var(--texte);font-weight:500;text-align:right;}
+.recap-rep{padding:10px 12px;font-size:.73rem;color:var(--texte2);line-height:1.8;border-top:1px solid var(--bordure);max-height:80px;overflow-y:auto;}
+
+.meca-list{display:flex;flex-direction:column;gap:6px;}
+.meca-card{border:2px solid var(--bordure);padding:11px 14px;cursor:pointer;transition:all .15s;background:var(--gris2);display:flex;align-items:center;gap:11px;user-select:none;}
+.meca-card:hover{border-color:var(--gris4);}
+.meca-card.sel-A{border-color:var(--mA);background:#161100;}
+.meca-card.sel-B{border-color:var(--mB);background:#160606;}
+.meca-card.sel-C{border-color:var(--mC);background:#061606;}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dot-A{background:var(--mA);}
+.dot-B{background:var(--mB);}
+.dot-C{background:var(--mC);}
+.meca-info{flex:1;}
+.meca-nom{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:1px;}
+.meca-dispo{font-size:.6rem;color:var(--texte3);margin-top:2px;}
+.meca-chk{width:15px;height:15px;border:2px solid var(--bordure);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;transition:all .15s;}
+.meca-card.sel-A .meca-chk{border-color:var(--mA);background:var(--mA);color:#000;}
+.meca-card.sel-B .meca-chk{border-color:var(--mB);background:var(--mB);color:#fff;}
+.meca-card.sel-C .meca-chk{border-color:var(--mC);background:var(--mC);color:#fff;}
+
+.duree-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.dur{background:var(--gris2);border:1px solid var(--bordure);padding:8px 3px;text-align:center;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:.3px;color:var(--texte2);transition:all .15s;}
+.dur:hover{border-color:var(--accent);color:var(--accent);}
+.dur.active{background:#161100;border-color:var(--accent);color:var(--accent);}
+
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:600;}
+.field input,.field select,.field textarea{background:var(--gris2);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:8px 10px;font-family:'Barlow',sans-serif;font-size:.84rem;outline:none;width:100%;transition:border-color .2s;-webkit-appearance:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-color:var(--accent);}
+.field select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23a89f8c' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.field select option{background:var(--gris);}
+.field textarea{resize:vertical;min-height:54px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+.btn-valider{width:100%;background:var(--accent);color:#000;border:none;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:4px;}
+.btn-valider:hover{background:var(--accent2);}
+.btn-valider:disabled{background:var(--gris4);color:var(--texte3);cursor:not-allowed;}
+
+/* CALENDRIER */
+.cal-zone{padding:18px;overflow-y:auto;background:var(--noir);}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.cal-nav{display:flex;align-items:center;gap:10px;}
+.cal-nav button{background:var(--gris2);border:1px solid var(--bordure);color:var(--texte2);width:30px;height:30px;cursor:pointer;font-size:.95rem;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.cal-nav button:hover{border-color:var(--accent);color:var(--accent);}
+.cal-week-label{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:2px;color:var(--texte);}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;font-size:.62rem;color:var(--texte2);text-transform:uppercase;letter-spacing:.5px;}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+
+.rdv-today{background:var(--gris2);border:1px solid var(--bordure);margin-bottom:14px;}
+.rdv-today-title{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:7px 12px;border-bottom:1px solid var(--bordure);}
+.rdv-list{padding:8px 12px;display:flex;flex-direction:column;gap:4px;max-height:90px;overflow-y:auto;}
+.rdv-item{display:flex;align-items:center;gap:8px;font-size:.71rem;padding:2px 0;}
+.rdv-dot-sm{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.rdv-info{color:var(--texte2);}
+.rdv-info strong{color:var(--texte);}
+.rdv-empty{font-size:.7rem;color:var(--texte3);font-style:italic;}
+
+/* GRILLE CAL */
+.cal-scroll{overflow-x:auto;}
+.cal-grid{display:grid;border:1px solid var(--bordure);min-width:500px;}
+.cal-head-cell{background:var(--gris2);border-bottom:1px solid var(--bordure);border-right:1px solid var(--bordure);padding:7px 4px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:.67rem;letter-spacing:.8px;color:var(--texte2);}
+.cal-head-cell.today-col{background:var(--gris3);color:var(--accent);}
+.cal-head-cell.closed{color:var(--texte3);}
+.cal-head-cell:last-child{border-right:none;}
+.time-slot{background:var(--gris2);border-right:1px solid var(--bordure);height:34px;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--texte3);font-family:'Barlow Condensed',sans-serif;border-bottom:1px solid var(--bordure);}
+.day-slot{height:34px;border-bottom:1px solid rgba(255,255,255,.03);border-right:1px solid var(--bordure);cursor:pointer;transition:background .1s;position:relative;}
+.day-slot:last-child{border-right:none;}
+.day-slot.closed-slot{background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.015) 4px,rgba(255,255,255,.015) 8px);cursor:default;}
+.day-slot:hover:not(.closed-slot){background:rgba(232,180,0,.07);}
+
+.event{position:absolute;left:2px;right:2px;top:1px;border-radius:2px;padding:2px 5px;font-size:.58rem;font-family:'Barlow Condensed',sans-serif;overflow:hidden;z-index:10;white-space:nowrap;text-overflow:ellipsis;letter-spacing:.3px;}
+.ev-A{background:rgba(232,180,0,.22);border-left:3px solid var(--mA);color:var(--mA);}
+.ev-B{background:rgba(229,57,53,.18);border-left:3px solid var(--mB);color:var(--mB);}
+.ev-C{background:rgba(76,175,80,.18);border-left:3px solid var(--mC);color:var(--mC);}
+.preview-bar{position:absolute;left:2px;right:2px;top:1px;background:rgba(232,180,0,.25);border:1px dashed var(--accent);border-radius:2px;z-index:5;pointer-events:none;}
+
+#toast{position:fixed;bottom:22px;right:22px;background:var(--gris2);color:var(--texte);padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;display:none;z-index:9999;border-left:3px solid var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.6);}
+#toast.err{border-left-color:var(--rouge);}
+#toast.ok{border-left-color:var(--vert);}
+
+@media(max-width:800px){
+  .main{grid-template-columns:1fr;}
+  .cal-zone{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img id="hdr-logo-img" src="" alt="" style="width:32px;height:32px;object-fit:contain;display:none;">
+    <div>
+      <div class="logo" id="hdr-logo">MON <span>GARAGE</span></div>
+      <div class="header-sub">Planification RDV</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div class="badge-client" id="badge-client">—</div>
+    <a class="btn-retour" href="parametres.html" style="text-decoration:none;">⚙ Paramètres</a>
+    <button class="btn-retour" onclick="history.back()">← Retour devis</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PANEL GAUCHE -->
+  <div class="panel">
+
+    <div>
+      <div class="sec-title">Récap devis</div>
+      <div class="recap-box">
+        <div class="recap-row"><label>Client</label><span id="r-client">—</span></div>
+        <div class="recap-row"><label>Véhicule</label><span id="r-veh">—</span></div>
+        <div class="recap-row"><label>Immat.</label><span id="r-immat">—</span></div>
+        <div class="recap-row"><label>Devis N°</label><span id="r-devis">—</span></div>
+        <div class="recap-rep" id="r-rep">—</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Assigner un mécanicien</div>
+      <div class="meca-list">
+        <div class="meca-card" id="card-A" onclick="selectMeca('A')">
+          <div class="dot dot-A"></div>
+          <div class="meca-info">
+            <div class="meca-nom" id="nom-A">MÉCANICIEN A</div>
+            <div class="meca-dispo">Mardi → Vendredi · 9h – 18h</div>
+          </div>
+          <div class="meca-chk" id="chk-A"></div>
+        </div>
+        <div class="meca-card" id="card-B" onclick="selectMeca('B')">
+          <div class="dot dot-B"></div>
+          <div class="meca-info">
+            <div class="meca-nom" id="nom-B">MÉCANICIEN B</div>
+            <div class="meca-dispo">Mardi → Vendredi · 9h – 18h</div>
+          </div>
+          <div class="meca-chk" id="chk-B"></div>
+        </div>
+        <div class="meca-card" id="card-C" onclick="selectMeca('C')">
+          <div class="dot dot-C"></div>
+          <div class="meca-info">
+            <div class="meca-nom" id="nom-C">MÉCANICIEN C</div>
+            <div class="meca-dispo">Mardi → Samedi · 9h – 18h</div>
+          </div>
+          <div class="meca-chk" id="chk-C"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Date & Heure</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Date RDV</label>
+          <input type="date" id="rdv-date" onchange="onDateChange()">
+        </div>
+        <div class="field">
+          <label>Heure début</label>
+          <select id="rdv-heure" onchange="updateCal()">
+            <option value="">— Heure —</option>
+            <option>09:00</option><option>09:30</option>
+            <option>10:00</option><option>10:30</option>
+            <option>11:00</option><option>11:30</option>
+            <option>12:00</option><option>12:30</option>
+            <option>13:00</option><option>13:30</option>
+            <option>14:00</option><option>14:30</option>
+            <option>15:00</option><option>15:30</option>
+            <option>16:00</option><option>16:30</option>
+            <option>17:00</option><option>17:30</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Durée estimée</div>
+      <div class="duree-grid">
+        <div class="dur" data-h="0.5" onclick="setDuree(this)">30 mn</div>
+        <div class="dur" data-h="1"   onclick="setDuree(this)">1 h</div>
+        <div class="dur" data-h="1.5" onclick="setDuree(this)">1h30</div>
+        <div class="dur" data-h="2"   onclick="setDuree(this)">2 h</div>
+        <div class="dur" data-h="3"   onclick="setDuree(this)">3 h</div>
+        <div class="dur" data-h="4"   onclick="setDuree(this)">4 h</div>
+        <div class="dur" data-h="6"   onclick="setDuree(this)">6 h</div>
+        <div class="dur" data-h="8"   onclick="setDuree(this)">8 h</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Notes internes mécanicien</div>
+      <div class="field">
+        <textarea id="rdv-notes" placeholder="Instructions, pièces à commander, accès véhicule…"></textarea>
+      </div>
+    </div>
+
+    <button class="btn-valider" id="btn-valider" onclick="validerRDV()">
+      ✅ CONFIRMER LE RDV
+    </button>
+
+  </div>
+
+  <!-- CALENDRIER DROIT -->
+  <div class="cal-zone">
+
+    <div class="rdv-today">
+      <div class="rdv-today-title">📋 RDVs enregistrés — semaine en cours</div>
+      <div class="rdv-list" id="rdv-list">
+        <div class="rdv-empty">Aucun RDV cette semaine</div>
+      </div>
+    </div>
+
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button onclick="prevWeek()">‹</button>
+        <div class="cal-week-label" id="week-label"></div>
+        <button onclick="nextWeek()">›</button>
+      </div>
+      <div class="cal-legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--mA)"></div>Méca. A</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--mB)"></div>Méca. B</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--mC)"></div>Méca. C</div>
+      </div>
+    </div>
+
+    <div class="cal-scroll">
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const MPG_S = mpgGetSettings();
+
+// Disponibilités : jours de la semaine (0=dim, 1=lun, 2=mar...)
+const DISPO = { A:[2,3,4,5], B:[2,3,4,5], C:[2,3,4,5,6] };
+const H_DEB = 9, H_FIN = 18;
+
+// Créneaux de 30mn
+const SLOTS = [];
+for(let h=H_DEB; h<H_FIN; h++){
+  SLOTS.push(`${pad(h)}:00`);
+  SLOTS.push(`${pad(h)}:30`);
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+
+// État
+let selMeca = null;
+let selDuree = null;
+let weekStart = getMonday(new Date());
+let rdvs = [];
+
+// Données depuis devis
+let dd = {};
+try{
+  const s = localStorage.getItem('devis_to_planning');
+  if(s){ dd = JSON.parse(s); localStorage.removeItem('devis_to_planning'); }
+}catch(e){}
+
+// Init
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('hdr-logo').textContent = (MPG_S.nom||'Mon Garage').toUpperCase();
+  mpgApplyLogo('hdr-logo-img');
+  document.getElementById('nom-A').textContent = (MPG_S.mecaA||'Mécanicien A').toUpperCase();
+  document.getElementById('nom-B').textContent = (MPG_S.mecaB||'Mécanicien B').toUpperCase();
+  document.getElementById('nom-C').textContent = (MPG_S.mecaC||'Mécanicien C').toUpperCase();
+  document.getElementById('r-client').textContent  = dd.clientNom||'—';
+  document.getElementById('r-veh').textContent     = dd.vehicule||'—';
+  document.getElementById('r-immat').textContent   = dd.immat||'—';
+  document.getElementById('r-devis').textContent   = dd.numeroDevis||'—';
+  document.getElementById('r-rep').textContent     = dd.reparations||'—';
+  document.getElementById('badge-client').innerHTML= `Client : <strong>${dd.clientNom||'—'}</strong>`;
+  document.getElementById('rdv-date').value = nextWorkday();
+  try{ rdvs = JSON.parse(localStorage.getItem('mpg_rdvs')||'[]'); }catch(e){ rdvs=[]; }
+  renderCal();
+  renderList();
+});
+
+function nextWorkday(){
+  const d=new Date(); d.setDate(d.getDate()+1);
+  while([0,1].includes(d.getDay())) d.setDate(d.getDate()+1);
+  return d.toISOString().split('T')[0];
+}
+function getMonday(d){
+  const dt=new Date(d); const day=dt.getDay();
+  dt.setDate(dt.getDate()+(day===0?-6:1-day)); dt.setHours(0,0,0,0); return dt;
+}
+function addDays(d,n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
+function fmtShort(d){ return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}); }
+function fmtFull(d){ return d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short'}); }
+
+// Mécanicien — sélection unique
+function selectMeca(m){
+  selMeca = (selMeca===m) ? null : m;
+  ['A','B','C'].forEach(x=>{
+    const card=document.getElementById('card-'+x);
+    card.className='meca-card'+(selMeca===x?' sel-'+x:'');
+    document.getElementById('chk-'+x).textContent=selMeca===x?'✓':'';
+  });
+  updateCal();
+}
+
+// Durée
+function setDuree(btn){
+  document.querySelectorAll('.dur').forEach(d=>d.classList.remove('active'));
+  btn.classList.add('active');
+  selDuree=parseFloat(btn.dataset.h);
+  updateCal();
+}
+
+function onDateChange(){
+  const v=document.getElementById('rdv-date').value;
+  if(v){ weekStart=getMonday(new Date(v)); renderCal(); }
+}
+function updateCal(){ renderCal(); }
+function prevWeek(){ weekStart=addDays(weekStart,-7); renderCal(); }
+function nextWeek(){ weekStart=addDays(weekStart,7); renderCal(); }
+
+// ══ RENDU CALENDRIER ══
+function renderCal(){
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+
+  // 6 jours : Lun→Sam
+  const days=[]; for(let i=0;i<6;i++) days.push(addDays(weekStart,i));
+  const COLS=6;
+  grid.style.gridTemplateColumns=`44px repeat(${COLS},1fr)`;
+
+  // Label semaine
+  document.getElementById('week-label').textContent=
+    `${fmtFull(days[0])} → ${fmtFull(days[5])}`;
+
+  const today=new Date(); today.setHours(0,0,0,0);
+  const DOW_NAMES=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  // En-têtes
+  const th0=document.createElement('div');
+  th0.className='cal-head-cell';th0.style.background='var(--noir)';
+  grid.appendChild(th0);
+
+  days.forEach(d=>{
+    const dow=d.getDay();
+    const isOpen=[2,3,4,5,6].includes(dow);
+    const isToday=d.getTime()===today.getTime();
+    const th=document.createElement('div');
+    th.className='cal-head-cell'+(isToday?' today-col':'')+(isOpen?'':' closed');
+    th.innerHTML=`<div style="font-weight:700;">${DOW_NAMES[dow]}</div><div style="font-size:.58rem;margin-top:1px;">${fmtShort(d)}</div>`;
+    grid.appendChild(th);
+  });
+
+  // Lignes horaires
+  SLOTS.forEach(slot=>{
+    // Colonne heure
+    const tc=document.createElement('div');
+    tc.className='time-slot';
+    tc.textContent=slot.endsWith(':00')?slot:'';
+    grid.appendChild(tc);
+
+    days.forEach(d=>{
+      const dow=d.getDay();
+      const isOpen=[2,3,4,5,6].includes(dow);
+      const dateStr=d.toISOString().split('T')[0];
+      const cell=document.createElement('div');
+      cell.className='day-slot'+(isOpen?'':' closed-slot');
+      cell.dataset.date=dateStr; cell.dataset.slot=slot;
+
+      if(isOpen){
+        cell.addEventListener('click',()=>{
+          document.getElementById('rdv-date').value=dateStr;
+          const sel=document.getElementById('rdv-heure');
+          for(let i=0;i<sel.options.length;i++){
+            if(sel.options[i].text===slot||sel.options[i].value===slot){sel.selectedIndex=i;break;}
+          }
+          renderCal();
+        });
+      }
+      grid.appendChild(cell);
+    });
+  });
+
+  // Dessiner RDVs existants
+  rdvs.forEach(r=>drawEvent(r,days));
+
+  // Dessiner preview
+  const pDate=document.getElementById('rdv-date').value;
+  const pHeure=document.getElementById('rdv-heure').value;
+  if(pDate&&pHeure&&selDuree){
+    const cell=document.querySelector(`.day-slot[data-date="${pDate}"][data-slot="${pHeure}"]`);
+    if(cell){
+      const prev=document.createElement('div');
+      prev.className='preview-bar';
+      prev.style.height=(34*selDuree*2-4)+'px';
+      cell.appendChild(prev);
+    }
+  }
+}
+
+function drawEvent(rdv,days){
+  const cell=document.querySelector(`.day-slot[data-date="${rdv.date}"][data-slot="${rdv.heure}"]`);
+  if(!cell||!rdv.meca)return;
+  const ev=document.createElement('div');
+  ev.className=`event ev-${rdv.meca}`;
+  ev.style.height=(34*rdv.duree*2-4)+'px';
+  ev.textContent=`${rdv.meca} · ${rdv.client||'RDV'}`;
+  ev.title=`Méca.${rdv.meca} · ${rdv.client||''} · ${rdv.heure} (${rdv.duree}h)`;
+  cell.appendChild(ev);
+}
+
+// ══ LISTE RDVs ══
+function renderList(){
+  const el=document.getElementById('rdv-list');
+  const wEnd=addDays(weekStart,6);
+  const list=rdvs.filter(r=>{
+    const d=new Date(r.date); return d>=weekStart&&d<=wEnd;
+  }).sort((a,b)=>a.date.localeCompare(b.date)||a.heure.localeCompare(b.heure));
+
+  if(!list.length){el.innerHTML='<div class="rdv-empty">Aucun RDV cette semaine</div>';return;}
+  el.innerHTML=list.map(r=>`
+    <div class="rdv-item">
+      <div class="rdv-dot-sm" style="background:var(--m${r.meca})"></div>
+      <div class="rdv-info">
+        <strong>Méca.${r.meca}</strong> · ${r.date} ${r.heure}
+        (${r.duree}h) · <strong>${r.client||'—'}</strong>
+      </div>
+    </div>`).join('');
+}
+
+// ══ VALIDATION ══
+async function validerRDV(){
+  const date  = document.getElementById('rdv-date').value;
+  const heure = document.getElementById('rdv-heure').value;
+  const notes = document.getElementById('rdv-notes').value;
+
+  if(!selMeca)   { toast('⚠ Sélectionne un mécanicien','err'); return; }
+  if(!date)      { toast('⚠ Sélectionne une date','err'); return; }
+  if(!heure)     { toast('⚠ Sélectionne une heure','err'); return; }
+  if(!selDuree)  { toast('⚠ Sélectionne une durée','err'); return; }
+
+  // Vérif dispo mécanicien
+  const dow=new Date(date).getDay();
+  if(!DISPO[selMeca].includes(dow)){
+    const noms=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    toast(`⚠ Méca. ${selMeca} ne travaille pas le ${noms[dow]}`,'err'); return;
+  }
+
+  const btn=document.getElementById('btn-valider');
+  btn.disabled=true; btn.textContent='⏳ Envoi…';
+
+  // Calcul heure fin
+  const [h,m]=heure.split(':').map(Number);
+  const tot=h*60+m+selDuree*60;
+  const hFin=`${pad(Math.floor(tot/60))}:${pad(tot%60)}`;
+
+  const mecaNoms={A:MPG_S.mecaA||'Mécanicien A',B:MPG_S.mecaB||'Mécanicien B',C:MPG_S.mecaC||'Mécanicien C'};
+  const rdv={
+    type           :'rdv_reparation',
+    garage         :MPG_S.nom||'Mon Garage',
+    mecanicien     :mecaNoms[selMeca],
+    meca           :selMeca,
+    date           :date,
+    heure          :heure,
+    heure_debut    :heure,
+    heure_fin      :hFin,
+    duree          :selDuree,
+    duree_heures   :selDuree,
+    client         :dd.clientNom||'',
+    client_email   :dd.clientEmail||'',
+    client_tel     :dd.clientTel||'',
+    vehicule       :dd.vehicule||'',
+    immat          :dd.immat||'',
+    numero_devis   :dd.numeroDevis||'',
+    reparations    :dd.reparations||'',
+    notes          :notes,
+    // Champs Google Calendar
+    titre_event    :`[Méca ${selMeca}] ${dd.immat||''} — ${dd.vehicule||''}`,
+    description    :`Client: ${dd.clientNom||''}\nTél: ${dd.clientTel||''}\nVéhicule: ${dd.vehicule||''}\nImmat: ${dd.immat||''}\nDevis N°: ${dd.numeroDevis||''}\n\nRéparations:\n${dd.reparations||''}\n\nNotes: ${notes}`
+  };
+
+  // Sauvegarde locale
+  rdvs.push(rdv);
+  try{ localStorage.setItem('mpg_rdvs',JSON.stringify(rdvs.slice(-200))); }catch(e){}
+
+  toast(`✅ RDV Méca. ${selMeca} · ${date} à ${heure} confirmé !`,'ok');
+  renderCal(); renderList();
+  btn.textContent='✅ RDV CONFIRMÉ';
+  setTimeout(()=>{ btn.disabled=false; btn.textContent='✅ CONFIRMER LE RDV'; },3500);
+}
+
+// Toast
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=type;
+  t.style.display='block';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.style.display='none',4500);
+}
+</script>
+</body>
+</html>
