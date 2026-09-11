@@ -116,10 +116,18 @@ body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;m
 .ev-C{background:rgba(76,175,80,.18);border-left:3px solid var(--mC);color:var(--mC);}
 .preview-bar{position:absolute;left:2px;right:2px;top:1px;background:rgba(232,180,0,.25);border:1px dashed var(--accent);border-radius:2px;z-index:5;pointer-events:none;}
 
-/* MODAL EDIT RDV */
+#toast{position:fixed;bottom:22px;right:22px;background:var(--gris2);color:var(--texte);padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;display:none;z-index:9999;border-left:3px solid var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.6);}
+#toast.err{border-left-color:var(--rouge);}
+#toast.ok{border-left-color:var(--vert);}
+
+@media(max-width:800px){
+  .main{grid-template-columns:1fr;}
+  .cal-zone{display:none;}
+}
+
 .modal-rdv-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;visibility:hidden;pointer-events:none;align-items:center;justify-content:center;z-index:9998;}
 .modal-rdv-bg.open{visibility:visible;pointer-events:all;}
-.modal-rdv{background:var(--gris);border:1px solid var(--bordure);border-top:3px solid var(--accent);width:100%;max-width:420px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.8);}
+.modal-rdv{background:var(--gris);border:1px solid var(--bordure);border-top:3px solid var(--accent);width:100%;max-width:420px;padding:22px;}
 .modal-rdv h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
 .modal-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
 .modal-field label{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);}
@@ -132,15 +140,6 @@ body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;m
 .btn-modal-save:hover{background:var(--accent2);}
 .btn-modal-cancel{background:transparent;color:var(--texte2);border:1px solid var(--bordure);padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;cursor:pointer;}
 .event{cursor:pointer;}
-
-#toast{position:fixed;bottom:22px;right:22px;background:var(--gris2);color:var(--texte);padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;display:none;z-index:9999;border-left:3px solid var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.6);}
-#toast.err{border-left-color:var(--rouge);}
-#toast.ok{border-left-color:var(--vert);}
-
-@media(max-width:800px){
-  .main{grid-template-columns:1fr;}
-  .cal-zone{display:none;}
-}
 </style>
 </head>
 <body>
@@ -460,29 +459,20 @@ function renderCal(){
 }
 
 function drawEvent(rdv,days){
-  const cell=document.querySelector(`.day-slot[data-date="${rdv.date}"][data-slot="${rdv.heure}"]`);
+  const cell=document.querySelector('.day-slot[data-date="'+rdv.date+'"][data-slot="'+rdv.heure+'"]');
   if(!cell||!rdv.meca)return;
-  const idx = rdvs.indexOf(rdv);
+  const idx=rdvs.indexOf(rdv);
   const ev=document.createElement('div');
-  ev.className=`event ev-${rdv.meca}`;
+  ev.className='event ev-'+rdv.meca;
   const h=(34*rdv.duree*2-4);
   ev.style.height=h+'px';
   ev.style.overflow='hidden';
   ev.style.whiteSpace='normal';
   ev.style.lineHeight='1.3';
   ev.style.cursor='pointer';
-  const l1=`Méca.${rdv.meca} · ${rdv.client||'RDV'}`;
-  const veh=rdv.vehicule||'';
-  const immat=rdv.immat||'';
-  const l2=veh||immat ? `${veh}${veh&&immat?' — ':''}${immat}` : '';
-  const rep=(rdv.reparations||'').split('\n')[0].slice(0,40);
-  if(h>=50){
-    ev.innerHTML=`<div>${l1}</div>${l2?`<div style="opacity:.85">${l2}</div>`:''}${rep&&h>=70?`<div style="opacity:.7;font-size:.55rem">${rep}</div>`:''}`;
-  } else {
-    ev.textContent=l1;
-  }
-  ev.title=`Cliquez pour modifier ou supprimer`;
-  ev.addEventListener('click', e => { e.stopPropagation(); openEditModal(idx); });
+  ev.textContent='Méca.'+rdv.meca+' · '+(rdv.client||'RDV');
+  ev.title='Cliquez pour modifier ou supprimer';
+  ev.onclick=function(e){e.stopPropagation();openEditModal(idx);};
   cell.appendChild(ev);
 }
 
@@ -496,18 +486,8 @@ function renderList(){
 
   if(!list.length){el.innerHTML='<div class="rdv-empty">Aucun RDV cette semaine</div>';return;}
   el.innerHTML=list.map(r=>{
-    const idx = rdvs.indexOf(r);
-    return `
-    <div class="rdv-item">
-      <div class="rdv-dot-sm" style="background:var(--m${r.meca})"></div>
-      <div class="rdv-info" style="flex:1;">
-        <strong>Méca.${r.meca}</strong> · ${r.date} ${r.heure}
-        (${r.duree}h) · <strong>${r.client||'—'}</strong>
-        ${r.vehicule||r.immat ? `<span style="color:var(--accent);margin-left:4px">${r.vehicule||''}${r.vehicule&&r.immat?' — ':''}${r.immat||''}</span>` : ''}
-        ${r.reparations ? `<div style="color:var(--texte3);font-size:.68rem;margin-top:1px">${(r.reparations).split('\n')[0].slice(0,50)}</div>` : ''}
-      </div>
-      <button onclick="openEditModal(${idx})" style="background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:2px 8px;font-size:.62rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;flex-shrink:0;">✏️</button>
-    </div>`;
+    const idx=rdvs.indexOf(r);
+    return '<div class="rdv-item"><div class="rdv-dot-sm" style="background:var(--m'+r.meca+')"></div><div class="rdv-info" style="flex:1;"><strong>Méca.'+r.meca+'</strong> · '+r.date+' '+r.heure+' ('+r.duree+'h) · <strong>'+(r.client||'—')+'</strong></div><button onclick="openEditModal('+idx+')" style="background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:2px 8px;font-size:.62rem;cursor:pointer;font-family:Barlow Condensed,sans-serif;flex-shrink:0;">✏️</button></div>';
   }).join('');
 }
 
@@ -572,6 +552,16 @@ async function validerRDV(){
   setTimeout(()=>{ btn.disabled=false; btn.textContent='✅ CONFIRMER LE RDV'; },3500);
 }
 
+// Toast
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=type;
+  t.style.display='block';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.style.display='none',4500);
+}
+</script>
+
 <!-- MODAL MODIFIER / SUPPRIMER RDV -->
 <div class="modal-rdv-bg" id="modal-rdv-edit">
   <div class="modal-rdv">
@@ -630,16 +620,14 @@ async function validerRDV(){
 </div>
 
 <script>
-// ── MODAL EDIT RDV ──
 let editIndex = -1;
 
-// Remplir le select des heures
 (function fillHeures(){
   const sel = document.getElementById('edit-heure');
   for(let h=7; h<=19; h++){
     for(let m=0; m<60; m+=30){
-      const val = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-      sel.innerHTML += `<option value="${val}">${val}</option>`;
+      const val = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      sel.innerHTML += '<option value="'+val+'">'+val+'</option>';
     }
   }
 })();
@@ -653,7 +641,7 @@ function openEditModal(idx){
   document.getElementById('edit-veh').value = veh||'—';
   document.getElementById('edit-meca').value = rdv.meca||'A';
   document.getElementById('edit-date').value = rdv.date||'';
-  document.getElementById('edit-heure').value = rdv.heure||'08:00';
+  document.getElementById('edit-heure').value = rdv.heure||'09:00';
   document.getElementById('edit-duree').value = String(rdv.duree||1);
   document.getElementById('edit-notes').value = rdv.notes||'';
   document.getElementById('modal-rdv-edit').classList.add('open');
@@ -671,30 +659,27 @@ function supprimerRDV(){
   try{ localStorage.setItem('mpg_rdvs', JSON.stringify(rdvs.slice(-200))); }catch(e){}
   closeEditModal();
   renderCal(); renderList();
-  toast('🗑 RDV supprimé', 'ok');
+  toast('RDV supprime', 'ok');
 }
 
 function sauvegarderRDV(){
   if(editIndex < 0) return;
   const rdv = rdvs[editIndex];
-  rdv.meca   = document.getElementById('edit-meca').value;
-  rdv.date   = document.getElementById('edit-date').value;
-  rdv.heure  = document.getElementById('edit-heure').value;
+  rdv.meca  = document.getElementById('edit-meca').value;
+  rdv.date  = document.getElementById('edit-date').value;
+  rdv.heure = document.getElementById('edit-heure').value;
   rdv.heure_debut = rdv.heure;
-  rdv.duree  = parseFloat(document.getElementById('edit-duree').value);
-  rdv.notes  = document.getElementById('edit-notes').value;
-  // Recalculer heure fin
-  const [h,m] = rdv.heure.split(':').map(Number);
-  const tot = h*60 + m + rdv.duree*60;
-  const pad = n => String(n).padStart(2,'0');
-  rdv.heure_fin = `${pad(Math.floor(tot/60))}:${pad(tot%60)}`;
+  rdv.duree = parseFloat(document.getElementById('edit-duree').value);
+  rdv.notes = document.getElementById('edit-notes').value;
+  const parts = rdv.heure.split(':').map(Number);
+  const tot = parts[0]*60 + parts[1] + rdv.duree*60;
+  rdv.heure_fin = pad(Math.floor(tot/60))+':'+pad(tot%60);
   try{ localStorage.setItem('mpg_rdvs', JSON.stringify(rdvs.slice(-200))); }catch(e){}
   closeEditModal();
   renderCal(); renderList();
-  toast('✅ RDV modifié', 'ok');
+  toast('RDV modifie', 'ok');
 }
 
-// Fermer en cliquant sur le fond
 document.getElementById('modal-rdv-edit').addEventListener('click', function(e){
   if(e.target === this) closeEditModal();
 });
