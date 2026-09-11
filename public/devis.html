@@ -454,7 +454,7 @@ function addLine(type,desc=''){
     const id=++moC;
     const tr=document.createElement('tr');tr.id='mo-'+id;
     tr.innerHTML=`<td><input placeholder="Opération..." value="${esc(desc)}" oninput="calc()"></td>
-      <td><input type="number" min="0" step="500" placeholder="0" value="0" oninput="calc()" style="text-align:right;"></td>
+      <td><input type="number" min="0" step="100" placeholder="0" value="0" oninput="calc()" style="text-align:right;"></td>
       <td class="total-cell" id="mot-${id}">0,00 DA</td>
       <td><button class="btn-x" onclick="del('mo-${id}')">✕</button></td>`;
     document.getElementById('mo-body').appendChild(tr);
