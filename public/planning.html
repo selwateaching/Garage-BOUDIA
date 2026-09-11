@@ -116,6 +116,23 @@ body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;m
 .ev-C{background:rgba(76,175,80,.18);border-left:3px solid var(--mC);color:var(--mC);}
 .preview-bar{position:absolute;left:2px;right:2px;top:1px;background:rgba(232,180,0,.25);border:1px dashed var(--accent);border-radius:2px;z-index:5;pointer-events:none;}
 
+/* MODAL EDIT RDV */
+.modal-rdv-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9998;}
+.modal-rdv-bg.open{display:flex;}
+.modal-rdv{background:var(--gris);border:1px solid var(--bordure);border-top:3px solid var(--accent);width:100%;max-width:420px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.8);}
+.modal-rdv h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
+.modal-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.modal-field label{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);}
+.modal-field input,.modal-field select{background:var(--gris2);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:7px 10px;font-family:'Barlow',sans-serif;font-size:.85rem;outline:none;width:100%;}
+.modal-field input:focus,.modal-field select:focus{border-bottom-color:var(--accent);}
+.modal-rdv-btns{display:flex;gap:8px;justify-content:space-between;margin-top:16px;}
+.btn-modal-suppr{background:#3a0f0f;color:var(--rouge);border:1px solid var(--rouge);padding:9px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:2px;cursor:pointer;}
+.btn-modal-suppr:hover{background:#5a1a1a;}
+.btn-modal-save{background:var(--accent);color:#000;border:none;padding:9px 22px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:2px;cursor:pointer;}
+.btn-modal-save:hover{background:var(--accent2);}
+.btn-modal-cancel{background:transparent;color:var(--texte2);border:1px solid var(--bordure);padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;cursor:pointer;}
+.event{cursor:pointer;}
+
 #toast{position:fixed;bottom:22px;right:22px;background:var(--gris2);color:var(--texte);padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:1px;display:none;z-index:9999;border-left:3px solid var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.6);}
 #toast.err{border-left-color:var(--rouge);}
 #toast.ok{border-left-color:var(--vert);}
@@ -157,7 +174,6 @@ body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;m
         <div class="recap-row"><label>Véhicule</label><span id="r-veh">—</span></div>
         <div class="recap-row"><label>Immat.</label><span id="r-immat">—</span></div>
         <div class="recap-row"><label>Devis N°</label><span id="r-devis">—</span></div>
-        <div class="recap-row"><label>Mécanicien</label><span id="r-meca" style="color:var(--accent)">—</span></div>
         <div class="recap-rep" id="r-rep">—</div>
       </div>
     </div>
@@ -345,8 +361,6 @@ function selectMeca(m){
     card.className='meca-card'+(selMeca===x?' sel-'+x:'');
     document.getElementById('chk-'+x).textContent=selMeca===x?'✓':'';
   });
-  const rm=document.getElementById('r-meca');
-  if(rm) rm.textContent=selMeca?`Mécanicien ${selMeca}`:'—';
   updateCal();
 }
 
@@ -448,6 +462,7 @@ function renderCal(){
 function drawEvent(rdv,days){
   const cell=document.querySelector(`.day-slot[data-date="${rdv.date}"][data-slot="${rdv.heure}"]`);
   if(!cell||!rdv.meca)return;
+  const idx = rdvs.indexOf(rdv);
   const ev=document.createElement('div');
   ev.className=`event ev-${rdv.meca}`;
   const h=(34*rdv.duree*2-4);
@@ -455,6 +470,7 @@ function drawEvent(rdv,days){
   ev.style.overflow='hidden';
   ev.style.whiteSpace='normal';
   ev.style.lineHeight='1.3';
+  ev.style.cursor='pointer';
   const l1=`Méca.${rdv.meca} · ${rdv.client||'RDV'}`;
   const veh=rdv.vehicule||'';
   const immat=rdv.immat||'';
@@ -465,7 +481,8 @@ function drawEvent(rdv,days){
   } else {
     ev.textContent=l1;
   }
-  ev.title=`Méca.${rdv.meca} · ${rdv.client||''} · ${rdv.heure} (${rdv.duree}h)\n${l2}\n${rdv.reparations||''}`;
+  ev.title=`Cliquez pour modifier ou supprimer`;
+  ev.addEventListener('click', e => { e.stopPropagation(); openEditModal(idx); });
   cell.appendChild(ev);
 }
 
@@ -478,16 +495,20 @@ function renderList(){
   }).sort((a,b)=>a.date.localeCompare(b.date)||a.heure.localeCompare(b.heure));
 
   if(!list.length){el.innerHTML='<div class="rdv-empty">Aucun RDV cette semaine</div>';return;}
-  el.innerHTML=list.map(r=>`
+  el.innerHTML=list.map(r=>{
+    const idx = rdvs.indexOf(r);
+    return `
     <div class="rdv-item">
       <div class="rdv-dot-sm" style="background:var(--m${r.meca})"></div>
-      <div class="rdv-info">
+      <div class="rdv-info" style="flex:1;">
         <strong>Méca.${r.meca}</strong> · ${r.date} ${r.heure}
         (${r.duree}h) · <strong>${r.client||'—'}</strong>
         ${r.vehicule||r.immat ? `<span style="color:var(--accent);margin-left:4px">${r.vehicule||''}${r.vehicule&&r.immat?' — ':''}${r.immat||''}</span>` : ''}
         ${r.reparations ? `<div style="color:var(--texte3);font-size:.68rem;margin-top:1px">${(r.reparations).split('\n')[0].slice(0,50)}</div>` : ''}
       </div>
-    </div>`).join('');
+      <button onclick="openEditModal(${idx})" style="background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:2px 8px;font-size:.62rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;flex-shrink:0;">✏️</button>
+    </div>`;
+  }).join('');
 }
 
 // ══ VALIDATION ══
@@ -551,14 +572,132 @@ async function validerRDV(){
   setTimeout(()=>{ btn.disabled=false; btn.textContent='✅ CONFIRMER LE RDV'; },3500);
 }
 
-// Toast
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=type;
-  t.style.display='block';
-  clearTimeout(t._t);
-  t._t=setTimeout(()=>t.style.display='none',4500);
+<!-- MODAL MODIFIER / SUPPRIMER RDV -->
+<div class="modal-rdv-bg" id="modal-rdv-edit">
+  <div class="modal-rdv">
+    <h3>✏️ Modifier le RDV</h3>
+    <div class="modal-field">
+      <label>Client</label>
+      <input type="text" id="edit-client" readonly style="opacity:.6;">
+    </div>
+    <div class="modal-field">
+      <label>Véhicule / Immat.</label>
+      <input type="text" id="edit-veh" readonly style="opacity:.6;">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="modal-field">
+        <label>Mécanicien</label>
+        <select id="edit-meca">
+          <option value="A">Mécanicien A</option>
+          <option value="B">Mécanicien B</option>
+          <option value="C">Mécanicien C</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Date</label>
+        <input type="date" id="edit-date">
+      </div>
+      <div class="modal-field">
+        <label>Heure début</label>
+        <select id="edit-heure"></select>
+      </div>
+      <div class="modal-field">
+        <label>Durée (h)</label>
+        <select id="edit-duree">
+          <option value="0.5">30 min</option>
+          <option value="1">1 h</option>
+          <option value="1.5">1h30</option>
+          <option value="2">2 h</option>
+          <option value="3">3 h</option>
+          <option value="4">4 h</option>
+          <option value="6">6 h</option>
+          <option value="8">Journée</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field" style="margin-top:6px;">
+      <label>Notes</label>
+      <input type="text" id="edit-notes">
+    </div>
+    <div class="modal-rdv-btns">
+      <button class="btn-modal-suppr" onclick="supprimerRDV()">🗑 Supprimer</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-modal-cancel" onclick="closeEditModal()">Annuler</button>
+        <button class="btn-modal-save" onclick="sauvegarderRDV()">✅ Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── MODAL EDIT RDV ──
+let editIndex = -1;
+
+// Remplir le select des heures
+(function fillHeures(){
+  const sel = document.getElementById('edit-heure');
+  for(let h=7; h<=19; h++){
+    for(let m=0; m<60; m+=30){
+      const val = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      sel.innerHTML += `<option value="${val}">${val}</option>`;
+    }
+  }
+})();
+
+function openEditModal(idx){
+  const rdv = rdvs[idx];
+  if(!rdv) return;
+  editIndex = idx;
+  document.getElementById('edit-client').value = rdv.client||'—';
+  const veh = [rdv.vehicule, rdv.immat].filter(Boolean).join(' — ');
+  document.getElementById('edit-veh').value = veh||'—';
+  document.getElementById('edit-meca').value = rdv.meca||'A';
+  document.getElementById('edit-date').value = rdv.date||'';
+  document.getElementById('edit-heure').value = rdv.heure||'08:00';
+  document.getElementById('edit-duree').value = String(rdv.duree||1);
+  document.getElementById('edit-notes').value = rdv.notes||'';
+  document.getElementById('modal-rdv-edit').classList.add('open');
 }
+
+function closeEditModal(){
+  document.getElementById('modal-rdv-edit').classList.remove('open');
+  editIndex = -1;
+}
+
+function supprimerRDV(){
+  if(editIndex < 0) return;
+  if(!confirm('Supprimer ce RDV ?')) return;
+  rdvs.splice(editIndex, 1);
+  try{ localStorage.setItem('mpg_rdvs', JSON.stringify(rdvs.slice(-200))); }catch(e){}
+  closeEditModal();
+  renderCal(); renderList();
+  toast('🗑 RDV supprimé', 'ok');
+}
+
+function sauvegarderRDV(){
+  if(editIndex < 0) return;
+  const rdv = rdvs[editIndex];
+  rdv.meca   = document.getElementById('edit-meca').value;
+  rdv.date   = document.getElementById('edit-date').value;
+  rdv.heure  = document.getElementById('edit-heure').value;
+  rdv.heure_debut = rdv.heure;
+  rdv.duree  = parseFloat(document.getElementById('edit-duree').value);
+  rdv.notes  = document.getElementById('edit-notes').value;
+  // Recalculer heure fin
+  const [h,m] = rdv.heure.split(':').map(Number);
+  const tot = h*60 + m + rdv.duree*60;
+  const pad = n => String(n).padStart(2,'0');
+  rdv.heure_fin = `${pad(Math.floor(tot/60))}:${pad(tot%60)}`;
+  try{ localStorage.setItem('mpg_rdvs', JSON.stringify(rdvs.slice(-200))); }catch(e){}
+  closeEditModal();
+  renderCal(); renderList();
+  toast('✅ RDV modifié', 'ok');
+}
+
+// Fermer en cliquant sur le fond
+document.getElementById('modal-rdv-edit').addEventListener('click', function(e){
+  if(e.target === this) closeEditModal();
+});
 </script>
 </body>
 </html>
