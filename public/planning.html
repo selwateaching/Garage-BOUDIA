@@ -117,8 +117,8 @@ body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;m
 .preview-bar{position:absolute;left:2px;right:2px;top:1px;background:rgba(232,180,0,.25);border:1px dashed var(--accent);border-radius:2px;z-index:5;pointer-events:none;}
 
 /* MODAL EDIT RDV */
-.modal-rdv-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9998;}
-.modal-rdv-bg.open{display:flex;}
+.modal-rdv-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;visibility:hidden;pointer-events:none;align-items:center;justify-content:center;z-index:9998;}
+.modal-rdv-bg.open{visibility:visible;pointer-events:all;}
 .modal-rdv{background:var(--gris);border:1px solid var(--bordure);border-top:3px solid var(--accent);width:100%;max-width:420px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.8);}
 .modal-rdv h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
 .modal-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
