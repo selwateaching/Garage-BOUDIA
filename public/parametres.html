@@ -148,17 +148,42 @@ function downloadLogo(){
   toast("✅ Logo téléchargé","ok");
 }
 
+// Compression image avant stockage (max 200x200px, qualité 0.7)
+function compressImage(file, maxSize, quality, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let w = img.width, h = img.height;
+      if(w > maxSize || h > maxSize){
+        if(w > h){ h = Math.round(h * maxSize / w); w = maxSize; }
+        else{ w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 document.getElementById("s-logo-file").addEventListener("change", (e)=>{
   const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=()=>{ currentLogo=reader.result; showImgPreview(currentLogo,"logo-img","logo-placeholder"); };
-  reader.readAsDataURL(file);
+  compressImage(file, 300, 0.75, (compressed)=>{
+    currentLogo = compressed;
+    showImgPreview(currentLogo,"logo-img","logo-placeholder");
+    toast("✅ Logo chargé et compressé","ok");
+  });
 });
 document.getElementById("s-tampon-file").addEventListener("change", (e)=>{
   const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=()=>{ currentTampon=reader.result; showImgPreview(currentTampon,"tampon-img","tampon-placeholder"); };
-  reader.readAsDataURL(file);
+  compressImage(file, 300, 0.75, (compressed)=>{
+    currentTampon = compressed;
+    showImgPreview(currentTampon,"tampon-img","tampon-placeholder");
+    toast("✅ Tampon chargé et compressé","ok");
+  });
 });
 
 function loadAll(){
@@ -179,8 +204,18 @@ function saveAll(){
     const el=document.getElementById("s-"+k);
     data[k]=el?el.value.trim():"";
   });
-  mpgSaveSettings(data);
-  toast("✅ Paramètres enregistrés","ok");
+  try{
+    mpgSaveSettings(data);
+    // Vérifier que le logo est bien sauvegardé
+    const check = mpgGetSettings();
+    if(currentLogo && !check.logo){
+      toast("⚠ Logo trop lourd — essayez une image plus petite","err");
+      return;
+    }
+    toast("✅ Paramètres enregistrés — logo sauvegardé !","ok");
+  }catch(e){
+    toast("⚠ Stockage plein — utilisez une image plus petite","err");
+  }
 }
 
 // ── EXPORT CONFIG ──
