@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,26 +7,32 @@
 <title>Paramètres — MecaPulse</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#2a2a2a;--vert:#4caf50;}
+:root{--noir:#0a0a0a;--gris:#141414;--gris2:#1c1c1c;--accent:#e8b400;--texte:#f0ece4;--texte2:#a89f8c;--bordure:#2a2a2a;--vert:#4caf50;--rouge:#e53935;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--noir);color:var(--texte);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
+body{background:var(--noir);color:var(--texte);font-family:"Barlow",sans-serif;font-weight:300;min-height:100vh;padding:36px 20px;}
 .container{max-width:640px;margin:0 auto;}
 header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:28px;}
-.titre{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.titre{font-family:"Barlow Condensed",sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
 .titre span{color:var(--accent);}
-.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-retour{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:8px 16px;font-family:"Barlow Condensed",sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;}
 .btn-retour:hover{border-color:var(--texte2);color:var(--texte);}
 section{margin-bottom:26px;}
-.section-title{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
+.section-title{font-family:"Barlow Condensed",sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
 label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:500;}
-input{background:var(--gris);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:10px 12px;font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;width:100%;}
+input{background:var(--gris);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:10px 12px;font-family:"Barlow",sans-serif;font-size:.9rem;outline:none;width:100%;}
 input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
 .hint{font-size:.72rem;color:var(--texte2);margin-top:-8px;margin-bottom:16px;line-height:1.6;}
-.btn-save{width:100%;background:var(--accent);color:#000;border:none;padding:15px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-top:8px;}
+.btn-save{width:100%;background:var(--accent);color:#000;border:none;padding:15px;font-family:"Barlow Condensed",sans-serif;font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-top:8px;}
 .btn-save:hover{background:#f5c800;}
-#toast{position:fixed;bottom:24px;right:24px;background:#163d16;color:#fff;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:1px;display:none;z-index:999;border-left:4px solid var(--vert);}
+.btn-export{width:100%;background:transparent;border:2px solid var(--accent);color:var(--accent);padding:13px;font-family:"Barlow Condensed",sans-serif;font-size:.95rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
+.btn-export:hover{background:rgba(232,180,0,.1);}
+.btn-import{width:100%;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:13px;font-family:"Barlow Condensed",sans-serif;font-size:.95rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;}
+.btn-import:hover{border-color:var(--texte2);color:var(--texte);}
+.transfer-box{background:var(--gris);border:1px solid var(--bordure);padding:16px;border-radius:2px;}
+#toast{position:fixed;bottom:24px;right:24px;background:#163d16;color:#fff;padding:12px 20px;font-family:"Barlow Condensed",sans-serif;font-size:.9rem;letter-spacing:1px;display:none;z-index:999;border-left:4px solid var(--vert);}
+#toast.err{background:#3d1616;border-left-color:var(--rouge);}
 @media(max-width:600px){.grid-2{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -42,7 +49,7 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
 
   <section>
     <div class="section-title">Identité du garage</div>
-    <div class="hint">Ces informations apparaissent sur les ordres de réparation, devis et PDF générés. À remplir une seule fois par garage.</div>
+    <div class="hint">Ces informations apparaissent sur les ordres de réparation, devis et PDF générés.</div>
     <div class="field">
       <label>Logo du garage</label>
       <div style="display:flex;align-items:center;gap:16px;">
@@ -52,7 +59,8 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <input type="file" id="s-logo-file" accept="image/*" style="padding:0;border:none;">
-          <button type="button" onclick="removeLogo()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le logo</button>
+          <button type="button" onclick="removeLogo()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le logo</button>
+          <button type="button" onclick="downloadLogo()" style="width:fit-content;background:transparent;border:1px solid var(--accent);color:var(--accent);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase;">⬇ Télécharger le logo</button>
         </div>
       </div>
     </div>
@@ -65,13 +73,13 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <input type="file" id="s-tampon-file" accept="image/*" style="padding:0;border:none;">
-          <button type="button" onclick="removeTampon()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le tampon</button>
+          <button type="button" onclick="removeTampon()" style="width:fit-content;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:5px 12px;font-size:.7rem;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase;">✕ Retirer le tampon</button>
         </div>
       </div>
-      <div class="hint" style="margin-top:6px;">Apparaît près de la signature du garagiste sur les PDF (ordre de réparation, devis).</div>
+      <div class="hint" style="margin-top:6px;">Apparaît près de la signature du garagiste sur les PDF.</div>
     </div>
     <div class="field"><label>Nom du garage</label><input id="s-nom" placeholder="Ex : Garage El Fath"></div>
-    <div class="field"><label>Adresse</label><input id="s-adresse" placeholder="Ex : Cité 500 Logts, Bir Mourad Raïs, Alger"></div>
+    <div class="field"><label>Adresse</label><input id="s-adresse" placeholder="Ex : Cité 500 Logts, Alger"></div>
     <div class="grid-2">
       <div class="field"><label>Téléphone</label><input id="s-tel" placeholder="0550 00 00 00"></div>
       <div class="field"><label>Email</label><input id="s-email" type="email" placeholder="contact@mongarage.dz"></div>
@@ -95,75 +103,138 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
     <div class="field"><label>Mécanicien C</label><input id="s-mecaC" placeholder="Mécanicien C"></div>
   </section>
 
-  <button class="btn-save" onclick="saveAll()">💾 Enregistrer</button>
+  <button class="btn-save" onclick="saveAll()">💾 Enregistrer les paramètres</button>
 
-  <section style="margin-top:34px;">
+  <!-- EXPORT / IMPORT -->
+  <section style="margin-top:30px;">
+    <div class="section-title">📦 Transfert de configuration</div>
+    <div class="hint">Exportez tous vos paramètres (logo, coordonnées, mécaniciens) dans un fichier. Importez-le sur un autre appareil ou navigateur pour retrouver exactement la même configuration.</div>
+    <div class="transfer-box" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn-export" onclick="exportConfig()">⬇ Exporter ma configuration (logo + paramètres)</button>
+      <div style="text-align:center;font-size:.7rem;color:var(--texte2);">— ou —</div>
+      <label style="font-size:.72rem;color:var(--texte2);letter-spacing:1px;text-transform:uppercase;margin-bottom:0;">Importer une configuration</label>
+      <input type="file" id="import-file" accept=".json" onchange="importConfig(event)" style="padding:6px;border:1px solid var(--bordure);color:var(--texte2);background:var(--gris2);">
+    </div>
+  </section>
+
+  <section style="margin-top:26px;">
     <div class="section-title">Zone de test</div>
-    <div class="hint">À utiliser avant de remettre l'application à un client, ou avant une démonstration : efface les clients, factures, rendez-vous et numéros créés pendant les essais sur ce poste. Le nom, le logo et les coordonnées du garage ci-dessus sont conservés.</div>
-    <button type="button" onclick="resetTestData()" style="width:100%;background:transparent;border:1px solid var(--bordure);color:#e57373;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">🗑 Réinitialiser les données de test</button>
+    <div class="hint">Efface les clients, factures, rendez-vous et numéros créés pendant les essais. Le logo et les coordonnées du garage sont conservés.</div>
+    <button type="button" onclick="resetTestData()" style="width:100%;background:transparent;border:1px solid var(--bordure);color:#e57373;padding:14px;font-family:Barlow Condensed,sans-serif;font-size:.92rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">🗑 Réinitialiser les données de test</button>
   </section>
 </div>
 <div id="toast"></div>
 
 <script src="assets/settings.js"></script>
 <script>
-let currentLogo = '';
-let currentTampon = '';
+let currentLogo = "";
+let currentTampon = "";
 
 function showImgPreview(dataUrl, imgId, phId){
   const img=document.getElementById(imgId), ph=document.getElementById(phId);
-  if(dataUrl){ img.src=dataUrl; img.style.display='block'; ph.style.display='none'; }
-  else{ img.src=''; img.style.display='none'; ph.style.display='block'; }
+  if(dataUrl){ img.src=dataUrl; img.style.display="block"; ph.style.display="none"; }
+  else{ img.src=""; img.style.display="none"; ph.style.display="block"; }
 }
-function removeLogo(){ currentLogo=''; showImgPreview('','logo-img','logo-placeholder'); document.getElementById('s-logo-file').value=''; }
-function removeTampon(){ currentTampon=''; showImgPreview('','tampon-img','tampon-placeholder'); document.getElementById('s-tampon-file').value=''; }
+function removeLogo(){ currentLogo=""; showImgPreview("","logo-img","logo-placeholder"); document.getElementById("s-logo-file").value=""; }
+function removeTampon(){ currentTampon=""; showImgPreview("","tampon-img","tampon-placeholder"); document.getElementById("s-tampon-file").value=""; }
 
-document.getElementById('s-logo-file').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ currentLogo = reader.result; showImgPreview(currentLogo,'logo-img','logo-placeholder'); };
+function downloadLogo(){
+  if(!currentLogo){ toast("Aucun logo chargé","err"); return; }
+  const ext = currentLogo.match(/^data:image\/(\w+);/)?.[1] || "png";
+  const a = document.createElement("a");
+  a.href = currentLogo;
+  a.download = "logo-garage." + ext;
+  a.click();
+  toast("✅ Logo téléchargé","ok");
+}
+
+document.getElementById("s-logo-file").addEventListener("change", (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ currentLogo=reader.result; showImgPreview(currentLogo,"logo-img","logo-placeholder"); };
   reader.readAsDataURL(file);
 });
-document.getElementById('s-tampon-file').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ currentTampon = reader.result; showImgPreview(currentTampon,'tampon-img','tampon-placeholder'); };
+document.getElementById("s-tampon-file").addEventListener("change", (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ currentTampon=reader.result; showImgPreview(currentTampon,"tampon-img","tampon-placeholder"); };
   reader.readAsDataURL(file);
 });
 
 function loadAll(){
-  const s = mpgGetSettings();
-  ['nom','adresse','tel','email','nif','rc','ai','mecaA','mecaB','mecaC'].forEach(k=>{
-    const el = document.getElementById('s-'+k);
-    if(el) el.value = s[k] === MPG_DEFAULTS[k] && !s[k] ? '' : (s[k] || '');
+  const s=mpgGetSettings();
+  ["nom","adresse","tel","email","nif","rc","ai","mecaA","mecaB","mecaC"].forEach(k=>{
+    const el=document.getElementById("s-"+k);
+    if(el) el.value=s[k]||"";
   });
-  currentLogo = s.logo || '';
-  currentTampon = s.tampon || '';
-  showImgPreview(currentLogo,'logo-img','logo-placeholder');
-  showImgPreview(currentTampon,'tampon-img','tampon-placeholder');
-}
-function saveAll(){
-  const data = { logo: currentLogo, tampon: currentTampon };
-  ['nom','adresse','tel','email','nif','rc','ai','mecaA','mecaB','mecaC'].forEach(k=>{
-    const el = document.getElementById('s-'+k);
-    data[k] = el ? el.value.trim() : '';
-  });
-  mpgSaveSettings(data);
-  const t=document.getElementById('toast');
-  t.textContent='✅ Paramètres enregistrés';t.style.display='block';
-  setTimeout(()=>t.style.display='none',3000);
-}
-function resetTestData(){
-  if(!confirm("Effacer tous les clients, factures, rendez-vous et numéros de test sur ce poste ?\n\nLes réglages du garage (nom, logo, coordonnées) seront conservés.\n\nCette action est irréversible.")) return;
-  ['mpg_clients','mpg_factures','mpg_rdvs','or_n','devis_n','facture_n'].forEach(k=>localStorage.removeItem(k));
-  const t=document.getElementById('toast');
-  t.textContent='✅ Données de test effacées';t.style.display='block';
-  setTimeout(()=>t.style.display='none',3000);
+  currentLogo=s.logo||"";
+  currentTampon=s.tampon||"";
+  showImgPreview(currentLogo,"logo-img","logo-placeholder");
+  showImgPreview(currentTampon,"tampon-img","tampon-placeholder");
 }
 
-mpgSetPageTitle('Paramètres');
+function saveAll(){
+  const data={ logo:currentLogo, tampon:currentTampon };
+  ["nom","adresse","tel","email","nif","rc","ai","mecaA","mecaB","mecaC"].forEach(k=>{
+    const el=document.getElementById("s-"+k);
+    data[k]=el?el.value.trim():"";
+  });
+  mpgSaveSettings(data);
+  toast("✅ Paramètres enregistrés","ok");
+}
+
+// ── EXPORT CONFIG ──
+function exportConfig(){
+  const s=mpgGetSettings();
+  const config={
+    version:"1.0",
+    exportDate:new Date().toISOString(),
+    garage:s
+  };
+  const blob=new Blob([JSON.stringify(config,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  const nom=(s.nom||"garage").replace(/\s+/g,"-").toLowerCase();
+  a.download="config-"+nom+"-"+new Date().toISOString().slice(0,10)+".json";
+  a.click();
+  toast("✅ Configuration exportée — gardez ce fichier précieusement !","ok");
+}
+
+// ── IMPORT CONFIG ──
+function importConfig(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const config=JSON.parse(reader.result);
+      if(!config.garage){ toast("⚠ Fichier invalide","err"); return; }
+      if(!confirm("Importer cette configuration ? Les paramètres actuels seront remplacés.")) return;
+      mpgSaveSettings(config.garage);
+      loadAll();
+      toast("✅ Configuration importée avec succès !","ok");
+    }catch(e){
+      toast("❌ Erreur : fichier JSON invalide","err");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value="";
+}
+
+function resetTestData(){
+  if(!confirm("Effacer tous les clients, factures, rendez-vous et numéros de test ?\n\nLes réglages du garage seront conservés.\n\nCette action est irréversible.")) return;
+  ["mpg_clients","mpg_factures","mpg_rdvs","or_n","devis_n","facture_n"].forEach(k=>localStorage.removeItem(k));
+  toast("✅ Données de test effacées","ok");
+}
+
+function toast(msg,type="ok"){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className=type==="err"?"err":"";
+  t.style.display="block";
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.display="none",3500);
+}
+
+mpgSetPageTitle("Paramètres");
 loadAll();
 </script>
 </body>
