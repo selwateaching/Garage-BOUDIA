@@ -173,3 +173,98 @@ function mpgOpenGmail(to, subject, body){
     + '&body=' + encodeURIComponent(body || '');
   window.open(url, '_blank');
 }
+
+// ══ MENU LATÉRAL (cartes) ══
+// Injecte un menu de navigation en cartes, fixé à gauche, sur toutes les pages.
+// Appeler mpgRenderSidebar('cle', 'dark'|'light') une fois le <body> chargé.
+const MPG_PAGES = [
+  { key: 'index',      href: 'index.html',      label: 'Ordre de réparation', icon: '🔧' },
+  { key: 'devis',      href: 'devis.html',      label: 'Devis',               icon: '📄' },
+  { key: 'stock',      href: 'stock.html',      label: 'Stock',               icon: '📦' },
+  { key: 'clients',    href: 'clients.html',    label: 'Clients',             icon: '👥' },
+  { key: 'recettes',   href: 'recettes.html',   label: 'Recettes',            icon: '💰' },
+  { key: 'parametres', href: 'parametres.html', label: 'Paramètres',          icon: '⚙️' }
+];
+
+function mpgRenderSidebar(activeKey, theme){
+  theme = (theme === 'light') ? 'light' : 'dark';
+  const s = mpgGetSettings();
+
+  if(!document.getElementById('mpg-sidebar-style')){
+    const style = document.createElement('style');
+    style.id = 'mpg-sidebar-style';
+    style.textContent = `
+#mpg-sidebar{position:fixed;left:0;top:0;bottom:0;width:216px;z-index:1000;padding:22px 14px;
+  display:flex;flex-direction:column;gap:22px;overflow-y:auto;font-family:'Barlow','DM Sans',sans-serif;
+  box-sizing:border-box;}
+#mpg-sidebar.mpg-dark{background:#141414;border-right:1px solid #2a2a2a;}
+#mpg-sidebar.mpg-light{background:#fff;border-right:1px solid #e5e5e5;}
+.mpg-brand{display:flex;align-items:center;gap:10px;padding:0 4px;}
+.mpg-brand-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;}
+#mpg-sidebar.mpg-dark .mpg-brand-icon{background:#2d2500;border:1px solid #e8b400;color:#e8b400;}
+#mpg-sidebar.mpg-light .mpg-brand-icon{background:#fdeaea;border:1px solid #cc2222;color:#cc2222;}
+.mpg-brand-text{display:flex;flex-direction:column;line-height:1.3;min-width:0;}
+.mpg-brand-text strong{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mpg-brand-text span{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;}
+#mpg-sidebar.mpg-dark .mpg-brand-text strong{color:#f0ece4;}
+#mpg-sidebar.mpg-dark .mpg-brand-text span{color:#a89f8c;}
+#mpg-sidebar.mpg-light .mpg-brand-text strong{color:#111;}
+#mpg-sidebar.mpg-light .mpg-brand-text span{color:#888;}
+.mpg-nav{display:flex;flex-direction:column;gap:8px;}
+.mpg-nav-card{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;text-decoration:none;
+  font-size:.82rem;font-weight:500;transition:border-color .15s,background .15s,color .15s;}
+#mpg-sidebar.mpg-dark .mpg-nav-card{background:#1c1c1c;border:1px solid #2a2a2a;color:#a89f8c;}
+#mpg-sidebar.mpg-dark .mpg-nav-card:hover{border-color:#e8b400;color:#f0ece4;}
+#mpg-sidebar.mpg-dark .mpg-nav-card.active{background:#2d2500;border-color:#e8b400;color:#e8b400;}
+#mpg-sidebar.mpg-light .mpg-nav-card{background:#f7f7f7;border:1px solid #e8e8e8;color:#555;}
+#mpg-sidebar.mpg-light .mpg-nav-card:hover{border-color:#cc2222;color:#111;}
+#mpg-sidebar.mpg-light .mpg-nav-card.active{background:#fdeaea;border-color:#cc2222;color:#cc2222;}
+.mpg-nav-icon{font-size:1rem;flex-shrink:0;}
+#mpg-burger{position:fixed;top:14px;left:14px;z-index:1002;width:38px;height:38px;border-radius:8px;
+  display:none;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;}
+#mpg-sidebar.mpg-dark ~ #mpg-burger,body.mpg-sidebar-dark #mpg-burger{background:#1c1c1c;border:1px solid #2a2a2a;color:#e8b400;}
+body.mpg-sidebar-light #mpg-burger{background:#fff;border:1px solid #e5e5e5;color:#cc2222;}
+#mpg-overlay{display:none;}
+@media(max-width:880px){
+  #mpg-sidebar{transform:translateX(-100%);transition:transform .25s ease;box-shadow:2px 0 24px rgba(0,0,0,.4);}
+  body.mpg-sidebar-open #mpg-sidebar{transform:translateX(0);}
+  #mpg-burger{display:flex;}
+  body.mpg-sidebar-open #mpg-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;}
+}
+@media(min-width:881px){
+  body.mpg-has-sidebar{padding-left:252px;}
+}
+@media print{
+  #mpg-sidebar,#mpg-burger,#mpg-overlay{display:none !important;}
+  body.mpg-has-sidebar{padding-left:0 !important;}
+}
+`;
+    document.head.appendChild(style);
+  }
+
+  const cardsHtml = MPG_PAGES.map(p =>
+    `<a class="mpg-nav-card${p.key === activeKey ? ' active' : ''}" href="${p.href}">`
+    + `<span class="mpg-nav-icon">${p.icon}</span><span class="mpg-nav-label">${p.label}</span></a>`
+  ).join('');
+
+  const markupHost = document.createElement('div');
+  markupHost.innerHTML =
+    `<button id="mpg-burger" aria-label="Ouvrir le menu">☰</button>`
+    + `<div id="mpg-overlay"></div>`
+    + `<aside id="mpg-sidebar" class="mpg-${theme}">`
+    +   `<div class="mpg-brand"><div class="mpg-brand-icon">🔧</div>`
+    +   `<div class="mpg-brand-text"><strong>${(s.nom || 'MecaPulse Garage')}</strong><span>Menu</span></div></div>`
+    +   `<nav class="mpg-nav">${cardsHtml}</nav>`
+    + `</aside>`;
+
+  const ref = document.body.firstChild;
+  Array.from(markupHost.childNodes).forEach(node => document.body.insertBefore(node, ref));
+
+  document.body.classList.add('mpg-has-sidebar', theme === 'light' ? 'mpg-sidebar-light' : 'mpg-sidebar-dark');
+
+  const burger = document.getElementById('mpg-burger');
+  const overlay = document.getElementById('mpg-overlay');
+  if(burger) burger.addEventListener('click', () => document.body.classList.toggle('mpg-sidebar-open'));
+  if(overlay) overlay.addEventListener('click', () => document.body.classList.remove('mpg-sidebar-open'));
+}
