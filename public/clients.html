@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -27,6 +28,14 @@ header{display:flex;align-items:center;justify-content:space-between;border-bott
 label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--texte2);font-weight:500;}
 input{background:var(--gris2);border:1px solid var(--bordure);border-bottom:2px solid var(--bordure);color:var(--texte);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;width:100%;}
 input:focus{border-bottom-color:var(--accent);}
+/* RECHERCHE CLIENT */
+.search-wrap{position:relative;margin-bottom:18px;}
+.search-wrap input{width:100%;background:var(--gris2);border:1px solid var(--accent);border-bottom:2px solid var(--accent);color:var(--texte);padding:10px 12px;font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;}
+.search-results{position:absolute;top:100%;left:0;right:0;background:var(--gris);border:1px solid var(--accent);border-top:none;z-index:100;max-height:200px;overflow-y:auto;display:none;}
+.search-result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bordure);font-size:.85rem;}
+.search-result-item:hover{background:var(--gris2);color:var(--accent);}
+.search-result-item .item-nom{font-weight:600;}
+.search-result-item .item-info{font-size:.72rem;color:var(--texte2);margin-top:2px;}
 .btn-save{background:var(--accent);color:#000;border:none;padding:12px 24px;font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .btn-save:hover{background:#f5c800;}
 table{width:100%;border-collapse:collapse;font-size:.85rem;}
@@ -37,7 +46,10 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
 .badge-ent{background:#2d1a00;color:var(--accent);}
 .btn-x{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:4px 10px;font-size:.68rem;cursor:pointer;}
 .btn-x:hover{border-color:var(--rouge);color:var(--rouge);}
+.btn-edit{background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:4px 10px;font-size:.68rem;cursor:pointer;margin-right:4px;}
+.btn-edit:hover{border-color:var(--accent);color:var(--accent);}
 .empty{color:var(--texte2);font-style:italic;font-size:.85rem;padding:20px 0;text-align:center;}
+.hint{font-size:.72rem;color:var(--texte2);margin-bottom:12px;}
 #toast{position:fixed;bottom:24px;right:24px;background:#163d16;color:#fff;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:1px;display:none;z-index:999;border-left:4px solid var(--vert);}
 @media(max-width:600px){.grid-2{grid-template-columns:1fr;} table{font-size:.75rem;} th:nth-child(4),td:nth-child(4){display:none;}}
 </style>
@@ -53,15 +65,37 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
     </div>
   </header>
 
+  <!-- RECHERCHE CLIENT EXISTANT -->
   <div class="card">
-    <div class="section-title">Ajouter un client</div>
+    <div class="section-title">🔍 Rechercher un client existant</div>
+    <div class="hint">Tapez le nom, téléphone ou email pour retrouver un client déjà enregistré.</div>
+    <div class="search-wrap">
+      <input id="search-client" placeholder="Rechercher un client…" oninput="searchClients()" autocomplete="off">
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div id="client-detail" style="display:none;background:var(--gris2);border:1px solid var(--accent);padding:14px;margin-top:-10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:1px;" id="detail-nom">—</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="editClientFromDetail()" style="background:transparent;border:1px solid var(--accent);color:var(--accent);padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">✏️ Modifier</button>
+          <button onclick="deleteClientFromDetail()" style="background:transparent;border:1px solid var(--rouge);color:var(--rouge);padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">🗑 Supprimer</button>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--texte2);line-height:2;" id="detail-info"></div>
+    </div>
+  </div>
+
+  <!-- AJOUTER / MODIFIER CLIENT -->
+  <div class="card">
+    <div class="section-title" id="form-title">Ajouter un client</div>
     <div class="type-toggle" id="type-toggle">
       <button type="button" class="active" data-type="particulier" onclick="setType('particulier')">Particulier</button>
       <button type="button" data-type="entreprise" onclick="setType('entreprise')">Entreprise</button>
     </div>
     <div id="fields-particulier">
       <div class="grid-2">
-        <div class="field"><label>Nom complet</label><input id="f-nom"></div>
+        <div class="field"><label>Nom complet</label><input id="f-nom" list="autocomplete-clients" oninput="autofillFromList()" placeholder="Tapez pour voir les clients existants"></div>
+        <datalist id="autocomplete-clients"></datalist>
         <div class="field"><label>Téléphone</label><input id="f-tel"></div>
       </div>
       <div class="grid-2">
@@ -71,7 +105,8 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
     </div>
     <div id="fields-entreprise" style="display:none;">
       <div class="grid-2">
-        <div class="field"><label>Raison sociale</label><input id="fe-nom"></div>
+        <div class="field"><label>Raison sociale</label><input id="fe-nom" list="autocomplete-clients-ent" oninput="autofillFromListEnt()" placeholder="Tapez pour voir les entreprises existantes"></div>
+        <datalist id="autocomplete-clients-ent"></datalist>
         <div class="field"><label>Nom du contact</label><input id="fe-contact"></div>
       </div>
       <div class="grid-2">
@@ -84,7 +119,10 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
       </div>
       <div class="field"><label>Adresse</label><input id="fe-adresse"></div>
     </div>
-    <button class="btn-save" onclick="addClient()">💾 Enregistrer le client</button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-save" onclick="addClient()">💾 Enregistrer le client</button>
+      <button id="btn-cancel-edit" onclick="cancelEdit()" style="display:none;background:transparent;border:1px solid var(--bordure);color:var(--texte2);padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">✕ Annuler</button>
+    </div>
   </div>
 
   <div class="section-title">Liste des clients</div>
@@ -100,11 +138,150 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
 
 <script>
 let curType = 'particulier';
+let editingId = null;
+let detailClientId = null;
+
 function setType(t){
   curType = t;
   document.querySelectorAll('#type-toggle button').forEach(b=>b.classList.toggle('active', b.dataset.type===t));
   document.getElementById('fields-particulier').style.display = t==='particulier' ? 'block' : 'none';
   document.getElementById('fields-entreprise').style.display = t==='entreprise' ? 'block' : 'none';
+}
+
+// ── AUTOCOMPLÉTION DATALIST ──
+function fillDatalist(){
+  const clients = mpgGetClients();
+  const dlPart = document.getElementById('autocomplete-clients');
+  const dlEnt  = document.getElementById('autocomplete-clients-ent');
+  dlPart.innerHTML = clients.filter(c=>c.type!=='entreprise').map(c=>`<option value="${escHtml(c.nom||'')}"></option>`).join('');
+  dlEnt.innerHTML  = clients.filter(c=>c.type==='entreprise').map(c=>`<option value="${escHtml(c.nom||'')}"></option>`).join('');
+}
+
+function autofillFromList(){
+  const nom = document.getElementById('f-nom').value;
+  const c = mpgFindClientByName(nom);
+  if(!c || c.type==='entreprise') return;
+  document.getElementById('f-tel').value = c.tel||'';
+  document.getElementById('f-email').value = c.email||'';
+  document.getElementById('f-adresse').value = c.adresse||'';
+  editingId = c.id;
+  document.getElementById('form-title').textContent = 'Modifier le client';
+  document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+}
+
+function autofillFromListEnt(){
+  const nom = document.getElementById('fe-nom').value;
+  const c = mpgFindClientByName(nom);
+  if(!c || c.type!=='entreprise') return;
+  document.getElementById('fe-contact').value = c.contact||'';
+  document.getElementById('fe-tel').value = c.tel||'';
+  document.getElementById('fe-email').value = c.email||'';
+  document.getElementById('fe-nif').value = c.nif||'';
+  document.getElementById('fe-rc').value = c.rc||'';
+  document.getElementById('fe-adresse').value = c.adresse||'';
+  editingId = c.id;
+  document.getElementById('form-title').textContent = 'Modifier le client';
+  document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+}
+
+// ── RECHERCHE EN TEMPS RÉEL ──
+function searchClients(){
+  const q = document.getElementById('search-client').value.toLowerCase().trim();
+  const results = document.getElementById('search-results');
+  const detail = document.getElementById('client-detail');
+
+  if(!q){ results.style.display='none'; detail.style.display='none'; return; }
+
+  const clients = mpgGetClients();
+  const found = clients.filter(c=>
+    (c.nom||'').toLowerCase().includes(q) ||
+    (c.tel||'').includes(q) ||
+    (c.email||'').toLowerCase().includes(q) ||
+    (c.contact||'').toLowerCase().includes(q)
+  );
+
+  if(!found.length){
+    results.innerHTML='<div class="search-result-item" style="color:var(--texte2);cursor:default;">Aucun client trouvé</div>';
+    results.style.display='block';
+    detail.style.display='none';
+    return;
+  }
+
+  results.innerHTML = found.map(c=>`
+    <div class="search-result-item" onclick="selectClient('${c.id}')">
+      <div class="item-nom">${escHtml(c.nom||'—')} <span style="font-size:.65rem;color:var(--texte2);">${c.type==='entreprise'?'Entreprise':'Particulier'}</span></div>
+      <div class="item-info">${[c.tel,c.email].filter(Boolean).join(' · ')}</div>
+    </div>`).join('');
+  results.style.display='block';
+}
+
+function selectClient(id){
+  const clients = mpgGetClients();
+  const c = clients.find(cl=>cl.id===id);
+  if(!c) return;
+  detailClientId = id;
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('search-client').value = c.nom||'';
+
+  document.getElementById('detail-nom').textContent = c.nom||'—';
+  document.getElementById('detail-info').innerHTML = [
+    c.type==='entreprise' ? '<strong>Entreprise</strong>' : '<strong>Particulier</strong>',
+    c.tel ? '📞 '+c.tel : '',
+    c.email ? '✉ '+c.email : '',
+    c.adresse ? '📍 '+c.adresse : '',
+    c.contact ? '👤 Contact : '+c.contact : '',
+    c.nif ? 'NIF : '+c.nif : '',
+    c.rc ? 'RC : '+c.rc : '',
+  ].filter(Boolean).join('<br>');
+  document.getElementById('client-detail').style.display='block';
+}
+
+function editClientFromDetail(){
+  const clients = mpgGetClients();
+  const c = clients.find(cl=>cl.id===detailClientId);
+  if(!c) return;
+  setType(c.type||'particulier');
+  editingId = c.id;
+  if(c.type==='entreprise'){
+    document.getElementById('fe-nom').value = c.nom||'';
+    document.getElementById('fe-contact').value = c.contact||'';
+    document.getElementById('fe-tel').value = c.tel||'';
+    document.getElementById('fe-email').value = c.email||'';
+    document.getElementById('fe-nif').value = c.nif||'';
+    document.getElementById('fe-rc').value = c.rc||'';
+    document.getElementById('fe-adresse').value = c.adresse||'';
+  } else {
+    document.getElementById('f-nom').value = c.nom||'';
+    document.getElementById('f-tel').value = c.tel||'';
+    document.getElementById('f-email').value = c.email||'';
+    document.getElementById('f-adresse').value = c.adresse||'';
+  }
+  document.getElementById('form-title').textContent = 'Modifier le client';
+  document.getElementById('btn-cancel-edit').style.display='inline-block';
+  document.getElementById('client-detail').style.display='none';
+  document.getElementById('search-client').value='';
+  document.querySelector('.card').scrollIntoView({behavior:'smooth'});
+}
+
+function deleteClientFromDetail(){
+  if(!confirm('Supprimer ce client ?')) return;
+  mpgDeleteClient(detailClientId);
+  detailClientId = null;
+  document.getElementById('client-detail').style.display='none';
+  document.getElementById('search-client').value='';
+  fillDatalist();
+  renderList();
+  toast('🗑 Client supprimé');
+}
+
+function cancelEdit(){
+  editingId = null;
+  ['f-nom','f-tel','f-email','f-adresse','fe-nom','fe-contact','fe-tel','fe-email','fe-nif','fe-rc','fe-adresse'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.getElementById('form-title').textContent = 'Ajouter un client';
+  document.getElementById('btn-cancel-edit').style.display='none';
 }
 
 function addClient(){
@@ -114,6 +291,7 @@ function addClient(){
     if(!nom){ alert('Le nom est requis'); return; }
     client={ type:'particulier', nom, tel:document.getElementById('f-tel').value.trim(),
       email:document.getElementById('f-email').value.trim(), adresse:document.getElementById('f-adresse').value.trim() };
+    if(editingId) client.id = editingId;
   }else{
     const nom=document.getElementById('fe-nom').value.trim();
     if(!nom){ alert('La raison sociale est requise'); return; }
@@ -121,19 +299,21 @@ function addClient(){
       tel:document.getElementById('fe-tel').value.trim(), email:document.getElementById('fe-email').value.trim(),
       nif:document.getElementById('fe-nif').value.trim(), rc:document.getElementById('fe-rc').value.trim(),
       adresse:document.getElementById('fe-adresse').value.trim() };
+    if(editingId) client.id = editingId;
   }
   mpgUpsertClient(client);
-  ['f-nom','f-tel','f-email','f-adresse','fe-nom','fe-contact','fe-tel','fe-email','fe-nif','fe-rc','fe-adresse'].forEach(id=>document.getElementById(id).value='');
+  cancelEdit();
+  fillDatalist();
   renderList();
-  const t=document.getElementById('toast');
-  t.textContent='✅ Client enregistré';t.style.display='block';
-  setTimeout(()=>t.style.display='none',2500);
+  toast(editingId ? '✅ Client modifié' : '✅ Client enregistré');
 }
 
 function removeClient(id){
   if(!confirm('Supprimer ce client ?')) return;
   mpgDeleteClient(id);
+  fillDatalist();
   renderList();
+  toast('🗑 Client supprimé');
 }
 
 function renderList(){
@@ -147,12 +327,32 @@ function renderList(){
       <td>${escHtml(c.nom||'')}${c.contact?' <span style="color:var(--texte2);font-size:.78rem;">('+escHtml(c.contact)+')</span>':''}</td>
       <td>${escHtml(c.tel||'—')}</td>
       <td>${escHtml(c.email||'—')}</td>
-      <td><button class="btn-x" onclick="removeClient('${c.id}')">✕</button></td>
+      <td>
+        <button class="btn-edit" onclick="editClientFromId('${c.id}')">✏️</button>
+        <button class="btn-x" onclick="removeClient('${c.id}')">✕</button>
+      </td>
     </tr>`).join('');
 }
+
+function editClientFromId(id){
+  const clients = mpgGetClients();
+  const c = clients.find(cl=>cl.id===id);
+  if(!c) return;
+  detailClientId = id;
+  selectClient(id);
+  editClientFromDetail();
+}
+
 function escHtml(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
+
+// Fermer résultats si clic ailleurs
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-wrap')) document.getElementById('search-results').style.display='none';
+});
 
 mpgSetPageTitle('Clients');
+fillDatalist();
 renderList();
 </script>
 </body>
