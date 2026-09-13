@@ -41,8 +41,6 @@ input:focus{border-bottom-color:var(--accent);background:var(--gris2);}
   <header>
     <div class="titre">Paramètres <span>Garage</span></div>
     <div style="display:flex;gap:8px;">
-      <a class="btn-retour" href="clients.html">👥 Clients</a>
-      <a class="btn-retour" href="recettes.html">💰 Recettes</a>
       <a class="btn-retour" href="index.html">← Retour</a>
     </div>
   </header>
@@ -270,6 +268,7 @@ function toast(msg,type="ok"){
 }
 
 mpgSetPageTitle("Paramètres");
+mpgRenderSidebar('parametres', 'dark');
 loadAll();
 </script>
 </body>

@@ -59,8 +59,6 @@ td{padding:9px 6px;border-bottom:1px solid var(--bordure);}
   <header>
     <div class="titre">Clients <span>Garage</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <a class="btn-retour" href="parametres.html">⚙ Paramètres</a>
-      <a class="btn-retour" href="recettes.html">💰 Recettes</a>
       <a class="btn-retour" href="index.html">← Retour</a>
     </div>
   </header>
@@ -352,6 +350,7 @@ document.addEventListener('click', e=>{
 });
 
 mpgSetPageTitle('Clients');
+mpgRenderSidebar('clients', 'dark');
 fillDatalist();
 renderList();
 </script>

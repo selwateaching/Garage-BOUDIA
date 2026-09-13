@@ -111,11 +111,6 @@ tbody td{padding:9px 10px;vertical-align:middle;}
   <header>
     <div class="titre">Stock <span>Pièces</span></div>
     <div class="nav-links">
-      <a class="btn-nav" href="index.html">📋 OR</a>
-      <a class="btn-nav" href="devis.html">📄 Devis</a>
-      <a class="btn-nav" href="clients.html">👥 Clients</a>
-      <a class="btn-nav" href="recettes.html">💰 Recettes</a>
-      <a class="btn-nav" href="parametres.html">⚙ Paramètres</a>
       <button class="btn-nav accent" onclick="openModal()">+ Nouvelle pièce</button>
     </div>
   </header>
@@ -229,6 +224,7 @@ tbody td{padding:9px 10px;vertical-align:middle;}
 
 <script>
 mpgSetPageTitle('Stock Pièces');
+mpgRenderSidebar('stock', 'dark');
 
 // ══ DONNÉES ══
 const STOCK_KEY = 'mpg_stock';

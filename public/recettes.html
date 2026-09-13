@@ -56,8 +56,6 @@ input,select{background:var(--gris2);border:1px solid var(--bordure);border-bott
   <header>
     <div class="titre">Recettes <span>Garage</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <a class="btn-retour" href="clients.html">👥 Clients</a>
-      <a class="btn-retour" href="parametres.html">⚙ Paramètres</a>
       <a class="btn-retour" href="index.html">← Retour</a>
     </div>
   </header>
@@ -189,6 +187,7 @@ function confirmPayment(){
 function escHtml(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
 mpgSetPageTitle('Recettes');
+mpgRenderSidebar('recettes', 'dark');
 render();
 </script>
 </body>

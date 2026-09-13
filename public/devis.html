@@ -114,10 +114,6 @@ html,body{max-width:100%;overflow-x:hidden;}body{font-family:'DM Sans',sans-seri
   <div class="topbar">
     <h1>DEVIS <span>AUTO</span></h1>
     <div style="display:flex;gap:10px;align-items:center;">
-      <a href="stock.html" style="font-size:.75rem;color:#555;text-decoration:none;">📦 Stock</a>
-      <a href="clients.html" style="font-size:.75rem;color:#555;text-decoration:none;">👥 Clients</a>
-      <a href="recettes.html" style="font-size:.75rem;color:#555;text-decoration:none;">💰 Recettes</a>
-      <a href="parametres.html" style="font-size:.75rem;color:#555;text-decoration:none;">⚙ Paramètres</a>
       <button class="btn btn-reset" style="padding:7px 16px;font-size:.8rem;" onclick="resetDevis()">↺ Nouveau</button>
     </div>
   </div>
@@ -337,6 +333,7 @@ const GARAGE={nom:_s.nom,adresse:_s.adresse,ville:_s.ville||'',tel:_s.tel,email:
 document.getElementById('gn-nom').innerHTML=(GARAGE.nom||'Mon Garage').toUpperCase();
 mpgApplyLogo('gn-logo');
 mpgSetPageTitle('Devis');
+mpgRenderSidebar('devis', 'light');
 mpgApplyTampon('tampon-display');
 mpgFillClientDatalist('clients-list');
 document.getElementById('gn-info').innerHTML=[
